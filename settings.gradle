@@ -1,1 +1,4 @@
 rootProject.name = 'hereforus'
+include 'src:main:recommend'
+findProject(':src:main:recommend')?.name = 'recommend'
+
