@@ -11,7 +11,7 @@ import lombok.Setter;
 public class FestivalDto {
 
     @JsonProperty("GUNAME")
-    private String gu_name;
+    private String guName;
 
     @JsonProperty("TITLE")
     private String title;
