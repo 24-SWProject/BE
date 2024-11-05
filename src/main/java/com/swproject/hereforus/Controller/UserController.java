@@ -26,7 +26,10 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/api/naver/auth")
-    public Object getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) {
-        return userService.CodeToToken(code, state);
+    public Object getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) throws IOException {
+        String token = userService.CodeToToken(code, state);
+        String profile = String.valueOf(userService.fetchNaverProfile(token));
+
+        return profile;
     }
 }
