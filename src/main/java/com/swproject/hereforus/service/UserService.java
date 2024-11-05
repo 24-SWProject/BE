@@ -99,7 +99,7 @@ public class UserService {
         // 로그아웃 시 토큰 삭제
     }
 
-    public Long createUser() {
+    public static void createUser() {
         // User 객체 생성
     }
 
