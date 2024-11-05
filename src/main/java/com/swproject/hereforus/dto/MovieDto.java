@@ -1,4 +1,4 @@
-package com.swproject.hereforus.Dto;
+package com.swproject.hereforus.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

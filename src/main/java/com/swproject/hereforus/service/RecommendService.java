@@ -1,10 +1,11 @@
-package com.swproject.hereforus.Service;
+package com.swproject.hereforus.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swproject.hereforus.Dto.FestivalDto;
-import com.swproject.hereforus.Dto.MovieDto;
-import com.swproject.hereforus.Dto.WeatherDto;
+import com.swproject.hereforus.config.EnvConfig;
+import com.swproject.hereforus.dto.FestivalDto;
+import com.swproject.hereforus.dto.MovieDto;
+import com.swproject.hereforus.dto.WeatherDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,6 @@ import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-@Configuration
-@PropertySource("classpath:env.properties")
 @Service
 public class RecommendService {
 
@@ -29,17 +28,8 @@ public class RecommendService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${FESTIVAL_BASEURL}")
-    private String festivalBaseUrl;
-
-    @Value("${MOVIE_BASEURL}")
-    private String movieBaseUrl;
-
-    @Value("${MOVIE_KEY}")
-    private String movieKey;
-
-    @Value("${WEATHER_BASEURL}")
-    private String weatherBaseUrl;
+    @Autowired
+    private EnvConfig envConfig;
 
     /** 서울시 문화 행사 데이터 호출 */
     public List<FestivalDto> fetchFestivals() throws Exception {
@@ -51,7 +41,7 @@ public class RecommendService {
 
         while (hasMoreData) {
             String url = UriComponentsBuilder
-                    .fromUriString(festivalBaseUrl)
+                    .fromUriString(envConfig.getFestivalBaseUrl())
                     .buildAndExpand(start, end)
                     .toUriString();
 
@@ -97,8 +87,8 @@ public class RecommendService {
         List<MovieDto> movieList = new ArrayList<>();
 
         String url = UriComponentsBuilder
-                .fromUriString(movieBaseUrl)
-                .queryParam("key", movieKey)
+                .fromUriString(envConfig.getMovieBaseUrl())
+                .queryParam("key", envConfig.getMovieKey())
                 .queryParam("targetDt", formattedDate)
                 .toUriString();
 
@@ -117,7 +107,7 @@ public class RecommendService {
     /** 오늘 날씨 데이터 호출 */
     public WeatherDto fetchTodayWeather() throws Exception {
 
-        String response = restTemplate.getForObject(weatherBaseUrl, String.class);
+        String response = restTemplate.getForObject(envConfig.getWeatherBaseUrl(), String.class);
         JsonNode rootNode = objectMapper.readTree(response);
 
         WeatherDto weatherDto = new WeatherDto();

@@ -1,15 +1,14 @@
-package com.swproject.hereforus.Controller;
+package com.swproject.hereforus.controller;
 
-import com.swproject.hereforus.Service.UserService;
+import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
@@ -28,8 +27,13 @@ public class UserController {
     @GetMapping("/api/naver/auth")
     public Object getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) throws IOException {
         String token = userService.CodeToToken(code, state);
-        String profile = String.valueOf(userService.fetchNaverProfile(token));
+        String profile = userService.fetchNaverProfile(token);
 
         return profile;
+    }
+
+    @PostMapping("/user")
+    public String signup(UserDto user){
+        return "";
     }
 }

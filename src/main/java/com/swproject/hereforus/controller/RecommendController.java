@@ -1,9 +1,9 @@
-package com.swproject.hereforus.Controller;
+package com.swproject.hereforus.controller;
 
-import com.swproject.hereforus.Dto.FestivalDto;
-import com.swproject.hereforus.Dto.MovieDto;
-import com.swproject.hereforus.Dto.WeatherDto;
-import com.swproject.hereforus.Service.RecommendService;
+import com.swproject.hereforus.dto.FestivalDto;
+import com.swproject.hereforus.dto.MovieDto;
+import com.swproject.hereforus.dto.WeatherDto;
+import com.swproject.hereforus.service.RecommendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
