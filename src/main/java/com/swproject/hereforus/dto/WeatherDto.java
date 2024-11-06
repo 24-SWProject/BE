@@ -10,7 +10,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherDto {
     @JsonProperty("main")
-    private String main;
+    private String main; // 날씨 메인
 
     @JsonProperty("description")
     private String description; // 날씨 설명
