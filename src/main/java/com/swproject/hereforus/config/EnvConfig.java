@@ -12,25 +12,28 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:env.properties")
 public class EnvConfig {
     @Value("${FESTIVAL_BASEURL}")
-    private String festivalBaseUrl;
+    private String FestivalBaseUrl;
 
     @Value("${MOVIE_BASEURL}")
-    private String movieBaseUrl;
+    private String MovieBaseUrl;
 
     @Value("${MOVIE_KEY}")
-    private String movieKey;
+    private String MovieKey;
 
     @Value("${WEATHER_BASEURL}")
-    private String weatherBaseUrl;
+    private String WeatherBaseUrl;
+
+    @Value("${PERFORMANCE_BASEURL}")
+    private String PerformanceBaseUrl;
 
     @Value("${NAVER_CLIENT_ID}")
-    private String naverClientId;
+    private String NaverClientId;
 
     @Value("${NAVER_CLIENT_SECRET}")
-    private String naverClientSecret;
+    private String NaverClientSecret;
 
     @Value("${NAVER_CALLBACK_URL}")
-    private String naverCallbackUrl;
+    private String NaverCallbackUrl;
 
     @Value("${JWT_ISSUER}")
     private String JwtIssuer;
@@ -46,4 +49,5 @@ public class EnvConfig {
 
     @Value("${DATABASE_PASSWORD}")
     private String DatabasePassword;
+
 }

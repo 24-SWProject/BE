@@ -26,23 +26,23 @@ public class FestivalDto {
     private String useFee;
 
     @JsonProperty("ORG_LINK")
-    private String rgstLink;
+    private String registerLink;
 
     @JsonProperty("MAIN_IMG")
-    private String mainImg;
+    private String poster;
 
     @JsonProperty("RGSTDATE")
-    private String rgstDate;
+    private String registerDate;
 
     @JsonProperty("STRTDATE")
-    private String strtDate;
+    private String openDate;
 
     @JsonProperty("END_DATE")
     private String endDate;
 
     @JsonProperty("LOT")
-    private String longitude;
+    private String GPSy;
 
     @JsonProperty("LAT")
-    private String latitude;
+    private String GPSx;
 }

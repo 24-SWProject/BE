@@ -31,7 +31,6 @@ public class WebSecurityConfig {
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
-                .requestMatchers(toH2Console())
                 .requestMatchers(new AntPathRequestMatcher("/static/**"));
     }
 
@@ -43,7 +42,8 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/login"),
                                 new AntPathRequestMatcher("/signup"),
-                                new AntPathRequestMatcher("/user")
+                                new AntPathRequestMatcher("/user"),
+                                new AntPathRequestMatcher("/recommend/**")
                         ).permitAll()
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin

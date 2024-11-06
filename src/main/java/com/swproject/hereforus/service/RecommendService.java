@@ -2,14 +2,14 @@ package com.swproject.hereforus.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.dto.FestivalDto;
 import com.swproject.hereforus.dto.MovieDto;
+import com.swproject.hereforus.dto.PerformanceDto;
 import com.swproject.hereforus.dto.WeatherDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 
 @Service
 public class RecommendService {
@@ -54,7 +55,7 @@ public class RecommendService {
             } else {
                 for (JsonNode item : items) {
                     FestivalDto festival = objectMapper.readValue(item.toString(), FestivalDto.class);
-                    if (isOnGoing(festival)) {  // 진행 중인 축제 필터링
+                    if (isOnGoing(festival)) {
                         festivalList.add(festival);
                     }
                 }
@@ -71,13 +72,13 @@ public class RecommendService {
         LocalDate date = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 
-        LocalDate startDate = LocalDate.parse(festival.getStrtDate(), formatter);
+        LocalDate startDate = LocalDate.parse(festival.getOpenDate(), formatter);
         LocalDate endDate = LocalDate.parse(festival.getEndDate(), formatter);
 
         return (date.isEqual(startDate) || date.isAfter(startDate)) && date.isBefore(endDate);
     }
 
-    /** 일별 박스오피스 영화 데이터 호출 */
+    /** 일별 박스오피스 영화 데이터 호출*/
     public List<MovieDto> fetchMovies() throws Exception {
 
         LocalDate date = LocalDate.now().minusDays(1);
@@ -104,7 +105,7 @@ public class RecommendService {
         return movieList;
     }
 
-    /** 오늘 날씨 데이터 호출 */
+    /** 오늘자 날씨 데이터 호출 */
     public WeatherDto fetchTodayWeather() throws Exception {
 
         String response = restTemplate.getForObject(envConfig.getWeatherBaseUrl(), String.class);
@@ -129,5 +130,23 @@ public class RecommendService {
 
         return weatherDto;
     }
-}
 
+    /** 현재 진행 중인 공연 데이터 호출 */
+    public List<PerformanceDto> fetchPerformance() throws Exception {
+
+        List<PerformanceDto> performanceList = new ArrayList<>();
+
+        String response = restTemplate.getForObject(envConfig.getPerformanceBaseUrl(), String.class);
+
+        XmlMapper xmlMapper = new XmlMapper();
+        JsonNode rootNode = xmlMapper.readTree(response);
+        JsonNode items = rootNode.path("db");
+
+        for (JsonNode item : items) {
+            PerformanceDto performance = xmlMapper.treeToValue(item, PerformanceDto.class);
+            performanceList.add(performance);
+        }
+
+        return performanceList;
+    }
+}
