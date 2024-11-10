@@ -3,18 +3,17 @@ package com.swproject.hereforus.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swproject.hereforus.config.EnvConfig;
+import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -67,7 +66,7 @@ public class UserService {
         return objectMapper.writeValueAsString(accessToken);
     }
 
-    public String fetchNaverProfile(String token) throws IOException {
+    public UserDto fetchNaverProfile(String token) throws IOException {
         String apiUrl = "https://openapi.naver.com/v1/nid/me";
 
         HttpHeaders headers = new HttpHeaders();
@@ -79,8 +78,30 @@ public class UserService {
         JsonNode rootNode = objectMapper.readTree(responseBody);
         JsonNode responseNode = rootNode.path("response");
 
-        // 노드를 JSON 형식의 문자열로 변환
-        return objectMapper.writeValueAsString(responseNode);
+        return UserDto.builder()
+                .email(responseNode.path("email").asText())
+                .nickname(responseNode.path("nickname").asText())
+                .profileImg(responseNode.path("profile_image").asText())
+                .birthYear(responseNode.path("birthyear").asText())
+                .birthDate(responseNode.path("birthday").asText())
+                .build();
+    }
+
+
+    public Long createUser(UserDto userInfo) {
+        User user = User.builder()
+                .email(userInfo.getEmail())
+                .nickname(userInfo.getNickname())
+                .profileImg(userInfo.getProfileImg())
+                .birthYear(userInfo.getBirthYear())
+                .birthDate(userInfo.getBirthDate())
+                .build();
+
+        return userRepository.save(user).getId();  // 저장 후 ID 반환
+    }
+
+        public static void deleteUser() {
+
     }
 
     public static void createAccessToken() {
@@ -99,13 +120,7 @@ public class UserService {
         // 로그아웃 시 토큰 삭제
     }
 
-    public static void createUser() {
-        // User 객체 생성
-    }
 
-    public static void deleteUser() {
-
-    }
 
     // email 확인하고 새로운 유저 등록 => 토큰 발급 or 기존 회원은 토큰 발급만 하는 * 인증 처리 *
 }

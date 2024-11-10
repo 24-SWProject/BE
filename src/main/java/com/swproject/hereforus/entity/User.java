@@ -1,4 +1,4 @@
-package com.swproject.hereforus.domain;
+package com.swproject.hereforus.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,18 +9,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
-@Entity
 @Table(name="users")
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@Entity
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
+    @Column(updatable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String nickname;
@@ -31,10 +30,23 @@ public class User implements UserDetails {
 
     private String birthDate;
 
-    // 권한 반환
+    @Builder
+    public User(String email, String nickname, String profileImg, String birthYear, String birthDate) {
+        this.email = email;
+        this.nickname = nickname;
+        this.profileImg = profileImg;
+        this.birthYear = birthYear;
+        this.birthDate = birthDate;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
@@ -42,35 +54,29 @@ public class User implements UserDetails {
         return "";
     }
 
-    // 사용자의 고유한 값 반환
-    @Override
-    public String getUsername() {
-        return email;
-    }
 
-    // 계정 만료 여부 반환
+    // 계정 만료 여부
     @Override
-    public boolean isAccountNonExpired() {
+    public boolean isAccountNonExpired(){
         return true;
     }
 
-    // 계정 잠금 여부 반환
+    // 계정 잠금 여부
     @Override
-    public boolean isAccountNonLocked() {
+    public boolean isAccountNonLocked(){
         return true;
     }
 
-    // 패스워드의 만료 여부 반환 (소셜 로그인이므로 항상 true)
+    // 패스워드 만료 여부
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+       return true;
     }
 
-
-    // 계정 사용 여부 반환
+    // 계정 사용 가능 여부
     @Override
-    public boolean isEnabled() {
+    public boolean isEnabled(){
         return true;
     }
-}
 
+}

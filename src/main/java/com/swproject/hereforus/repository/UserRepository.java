@@ -1,6 +1,6 @@
 package com.swproject.hereforus.repository;
 
-import com.swproject.hereforus.domain.User;
+import com.swproject.hereforus.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
