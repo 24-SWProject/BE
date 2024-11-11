@@ -35,8 +35,8 @@ public class EnvConfig {
     @Value("${NAVER_CALLBACK_URL}")
     private String NaverCallbackUrl;
 
-    @Value("${JWT_ISSUER}")
-    private String JwtIssuer;
+    @Value("${JWT_EXPIRATION_TIME}")
+    private Long JwtExpirationTime;
 
     @Value("${JWT_SECRET_KEY}")
     private String JwtSecretKey;
@@ -49,5 +49,6 @@ public class EnvConfig {
 
     @Value("${DATABASE_PASSWORD}")
     private String DatabasePassword;
+
 
 }

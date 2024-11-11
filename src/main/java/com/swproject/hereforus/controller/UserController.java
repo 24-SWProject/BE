@@ -1,11 +1,15 @@
 package com.swproject.hereforus.controller;
 
+import com.swproject.hereforus.config.JwtTokenProvider;
 import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -21,6 +25,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
+    private JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/user/login")
     public void getCodeStatus(HttpServletResponse request, HttpServletResponse response) throws IOException {
@@ -30,19 +35,25 @@ public class UserController {
 
     @ResponseBody
     @GetMapping("/api/naver/auth")
-    public Object getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) throws IOException {
+    public ResponseEntity<String> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) throws IOException {
         // Code를 사용해 토큰을 요청
         String token = userService.CodeToToken(code, state);
 
         // 토큰으로 네이버에서 사용자 프로필 조회
         UserDto profile = userService.fetchNaverProfile(token);
-        System.out.println(profile);
 
-        Long userId = userService.createUser(profile);
-        System.out.println(userId);
+        // 유저 생성
+        UserDto user = userService.createUser(profile);
 
-        // 저장된 사용자 ID와 프로필 JSON 반환
-        return Map.of("userId", userId, "profile", profile);
+        // 기존 유저 시 pass
+        // 로그인 실패 시 처리
+
+        // 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(user);
+
+        System.out.println(accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body("로그인이 완료되었습니다.");
     }
 
     @GetMapping("/logout")

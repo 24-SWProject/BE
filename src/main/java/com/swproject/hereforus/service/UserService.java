@@ -8,6 +8,7 @@ import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpEntity;
@@ -30,6 +31,7 @@ public class UserService {
     private final ObjectMapper objectMapper;
     private final EnvConfig envConfig;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
 
     public String fetchNaverUrl() {
@@ -88,7 +90,8 @@ public class UserService {
     }
 
 
-    public Long createUser(UserDto userInfo) {
+    // dto -> entity 로 변환 후 저장 & entity -> dto로 변환 후 출력
+    public UserDto createUser(UserDto userInfo) {
         User user = User.builder()
                 .email(userInfo.getEmail())
                 .nickname(userInfo.getNickname())
@@ -97,7 +100,9 @@ public class UserService {
                 .birthDate(userInfo.getBirthDate())
                 .build();
 
-        return userRepository.save(user).getId();  // 저장 후 ID 반환
+        User savedUser = userRepository.save(user); // User 객체 저장
+
+        return modelMapper.map(savedUser, UserDto.class);
     }
 
         public static void deleteUser() {
