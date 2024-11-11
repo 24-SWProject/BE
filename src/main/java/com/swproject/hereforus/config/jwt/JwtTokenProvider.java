@@ -1,14 +1,12 @@
-package com.swproject.hereforus.config;
+package com.swproject.hereforus.config.jwt;
 
+import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.dto.UserDto;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -53,9 +51,9 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // token에서 userId 추출
-    public Long getUserId(String token) {
-        return parseClaims(token).get("Id", long.class);
+    // token에서 user email 추출
+    public String getUserEmail(String token) {
+        return parseClaims(token).get("email", String.class);
     }
 
     // jwt Claims 추출
