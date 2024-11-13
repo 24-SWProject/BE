@@ -3,6 +3,7 @@ package com.swproject.hereforus.controller;
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.repository.UserRepository;
 import com.swproject.hereforus.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,16 +19,17 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api")
-@ResponseBody
 public class UserController {
     @Autowired
     private UserService userService;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/user/login")
-    public void getCodeStatus(HttpServletResponse request, HttpServletResponse response) throws IOException {
+    public void getCodeStatus(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchNaverUrl();
         response.sendRedirect(loginUrl);
     }
@@ -39,16 +41,20 @@ public class UserController {
             String token = userService.CodeToToken(code, state);
             // 토큰으로 네이버에서 사용자 프로필 조회
             UserDto profile = userService.fetchNaverProfile(token);
-            // 유저 생성
-            UserDto user = userService.createUser(profile);
-            // 기존 유저 시 pass
+
+            System.out.println(profile);
+            System.out.println(profile.getEmail());
+
+            if (userRepository.findByEmail(profile.getEmail()) == null) {
+                userService.createUser(profile);
+            }
 
             // 액세스 토큰 생성
-            String accessToken = jwtTokenProvider.createAccessToken(user);
+            String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
             httpServletResponse.addHeader("Authorization", "Bearer " + accessToken);
 
             // 리프레시 토큰 생성
-            String refreshToken = jwtTokenProvider.createRefreshToken(user);
+            String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
@@ -57,6 +63,7 @@ public class UserController {
 
             return ResponseEntity.ok(jwtDto);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -65,10 +72,5 @@ public class UserController {
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("로그아웃이 완료되었습니다.");
-    }
-
-    @GetMapping("/test")
-    public Object test(){
-        return "성공";
     }
 }

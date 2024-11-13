@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
             authenticateUser(accessToken);
-        } else {// Access Token이 만료된 경우 Refresh Token 확인
+        } else {
             String refreshToken = getRefreshTokenFromCookies(request.getCookies());
 
             if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
@@ -36,17 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setHeader("Authorization", "Bearer " + newAccessToken);
 
                 authenticateUser(newAccessToken);
-            } else {
+            } else if (refreshToken != null) {
+                // Refresh Token이 유효하지 않은 경우 새로 발급
                 String userEmail = jwtTokenProvider.getUserEmail(refreshToken);
 
-                // 액세스 토큰 생성
-                String newAccessToken = jwtTokenProvider.createAccessToken(userEmail);
-                response.addHeader("Authorization", "Bearer " + newAccessToken);
+                if (userEmail != null) {  // userEmail이 null인지 확인
+                    String newAccessToken = jwtTokenProvider.createAccessToken(userEmail);
+                    response.addHeader("Authorization", "Bearer " + newAccessToken);
 
-                // 리프레시 토큰 생성
-                String newRefreshToken = jwtTokenProvider.createRefreshToken(userEmail);
-                Cookie refreshCookie = jwtTokenProvider.createCookie(newRefreshToken);
-                response.addCookie(refreshCookie);
+                    // 리프레시 토큰 생성 및 쿠키에 설정
+                    String newRefreshToken = jwtTokenProvider.createRefreshToken(userEmail);
+                    Cookie refreshCookie = jwtTokenProvider.createCookie(newRefreshToken);
+                    response.addCookie(refreshCookie);
+
+                    authenticateUser(newAccessToken);
+                }
             }
         }
         filterChain.doFilter(request, response);

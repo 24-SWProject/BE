@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -109,23 +106,4 @@ public class UserService {
 
     }
 
-    public static void createAccessToken() {
-        // access token 생성 (이메일만 추출)
-    }
-
-    public static void createRefreshToken() {
-        // refresh token 생성
-    }
-
-    public static void updateAccessToken() {
-        // refresh 요청 시 access 갱신
-    }
-
-    public static void deleteAccessToken() {
-        // 로그아웃 시 토큰 삭제
-    }
-
-
-
-    // email 확인하고 새로운 유저 등록 => 토큰 발급 or 기존 회원은 토큰 발급만 하는 * 인증 처리 *
 }
