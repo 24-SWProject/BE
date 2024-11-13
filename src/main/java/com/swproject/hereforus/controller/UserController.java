@@ -4,6 +4,7 @@ import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/naver/auth", produces = "application/json")
-    public ResponseEntity<JwtDto> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state) throws IOException {
+    public ResponseEntity<JwtDto> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state, HttpServletResponse httpServletResponse) throws IOException {
         try {
             // Code를 사용해 토큰을 요청
             String token = userService.CodeToToken(code, state);
@@ -42,9 +43,14 @@ public class UserController {
             UserDto user = userService.createUser(profile);
             // 기존 유저 시 pass
 
-            // 토큰 생성
+            // 액세스 토큰 생성
             String accessToken = jwtTokenProvider.createAccessToken(user);
-            String refreshToken = jwtTokenProvider.createAccessToken(user);
+            httpServletResponse.addHeader("Authorization", "Bearer " + accessToken);
+
+            // 리프레시 토큰 생성
+            String refreshToken = jwtTokenProvider.createRefreshToken(user);
+            Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
+            httpServletResponse.addCookie(refreshCookie);
 
             // JwtDto 객체 생성
             JwtDto jwtDto = new JwtDto("Bearer", accessToken, refreshToken);

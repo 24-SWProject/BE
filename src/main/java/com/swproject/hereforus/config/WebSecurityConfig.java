@@ -44,6 +44,7 @@ public class WebSecurityConfig {
         // 권한 규칙 작성
         http.authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/recommend/**").permitAll()
                         .anyRequest().authenticated()
         );
 

@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +56,7 @@ public class RecommendService {
             } else {
                 for (JsonNode item : items) {
                     FestivalDto festival = objectMapper.readValue(item.toString(), FestivalDto.class);
-                    if (isOnGoing(festival)) {
+                    if (isOnGoingToday(festival)) {
                         festivalList.add(festival);
                     }
                 }
@@ -68,7 +69,7 @@ public class RecommendService {
     }
 
     /** 행사가 현재 날짜 기점으로 진행 중인지 확인 */
-    public boolean isOnGoing(FestivalDto festival) {
+    public boolean isOnGoingToday(FestivalDto festival) {
         LocalDate date = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 
@@ -76,6 +77,17 @@ public class RecommendService {
         LocalDate endDate = LocalDate.parse(festival.getEndDate(), formatter);
 
         return (date.isEqual(startDate) || date.isAfter(startDate)) && date.isBefore(endDate);
+    }
+
+    /** 행사가 사용자가 요청한 날짜 기점으로 진행 중인지 확인 */
+    public boolean isOnGoingAtRequestedDate(FestivalDto festival, String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+
+        LocalDate requestedDate = LocalDate.parse(date, formatter);
+        LocalDate startDate = LocalDate.parse(festival.getOpenDate(), formatter);
+        LocalDate endDate = LocalDate.parse(festival.getEndDate(), formatter);
+
+        return (requestedDate.isEqual(startDate) || requestedDate.isAfter(startDate)) && requestedDate.isBefore(endDate);
     }
 
     /** 일별 박스오피스 영화 데이터 호출*/

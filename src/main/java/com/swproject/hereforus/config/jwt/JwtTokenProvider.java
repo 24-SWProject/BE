@@ -5,6 +5,7 @@ import com.swproject.hereforus.dto.UserDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.http.Cookie;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Date;
 public class JwtTokenProvider {
     private final Key key;
     private final long accessTokenExpTime;
+    private final long refreshTokenExpTime;
     private EnvConfig envConfig;
 
     // secret key 저장
@@ -27,18 +29,22 @@ public class JwtTokenProvider {
         this.envConfig = envConfig;
         byte[] keyBytes = java.util.Base64.getDecoder().decode(envConfig.getJwtSecretKey());
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenExpTime = envConfig.getJwtExpirationTime();
+        this.accessTokenExpTime = envConfig.getAccessJwtExpirationTime();
+        this.refreshTokenExpTime = envConfig.getRefreshJwtExpirationTime();
     }
 
     // access token 생성
-    public String createAccessToken(UserDto user) {
-        return createToken(user, accessTokenExpTime);
+    public String createAccessToken(String email) {
+        return createToken(email, accessTokenExpTime);
     }
 
+    // refresh token 생성
+    public String createRefreshToken(String email) { return createToken(email, refreshTokenExpTime); }
+
     // jwt 생성
-    private String createToken(UserDto user, long expireTime) {
+    private String createToken(String email, long expireTime) {
         Claims claims = Jwts.claims();
-        claims.put("email", user.getEmail());
+        claims.put("email", email);
 
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
@@ -80,6 +86,19 @@ public class JwtTokenProvider {
             log.info("JWT claims string is empty.", e);
         }
         return false;
+    }
+
+    // cookie 설정
+    public Cookie createCookie(String refreshToken) {
+        String cookieName = "refreshtoken";
+        String cookieValue = refreshToken;
+        Cookie cookie = new Cookie(cookieName, cookieValue);
+
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        return cookie;
     }
 
 }

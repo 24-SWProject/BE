@@ -35,8 +35,11 @@ public class EnvConfig {
     @Value("${NAVER_CALLBACK_URL}")
     private String NaverCallbackUrl;
 
-    @Value("${JWT_EXPIRATION_TIME}")
-    private Long JwtExpirationTime;
+    @Value("${ACCESS_JWT_EXPIRATION_TIME}")
+    private Long AccessJwtExpirationTime;
+
+    @Value("${REFRESH_JWT_EXPIRATION_TIME}")
+    private Long RefreshJwtExpirationTime;
 
     @Value("${JWT_SECRET_KEY}")
     private String JwtSecretKey;
