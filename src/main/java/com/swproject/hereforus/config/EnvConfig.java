@@ -14,15 +14,6 @@ public class EnvConfig {
     @Value("${FESTIVAL_BASEURL}")
     private String FestivalBaseUrl;
 
-    @Value("${MOVIE_BASEURL}")
-    private String MovieBaseUrl;
-
-    @Value("${MOVIE_KEY}")
-    private String MovieKey;
-
-    @Value("${WEATHER_BASEURL}")
-    private String WeatherBaseUrl;
-
     @Value("${PERFORMANCE_BASEURL}")
     private String PerformanceBaseUrl;
 

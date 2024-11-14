@@ -2,6 +2,7 @@ package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.dto.FestivalDto;
 import com.swproject.hereforus.dto.PerformanceDto;
+import com.swproject.hereforus.entity.Festival;
 import com.swproject.hereforus.service.EventService;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,28 +21,24 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-    @Hidden
     @GetMapping("/festival")
-    public List<FestivalDto> getFestival(HttpServletRequest request) throws Exception {
-
+    public List<Festival> getFestival(HttpServletRequest request) throws Exception {
         // 쿼리 파라미터로 요청 날짜 받기
         String date = request.getParameter("date");
         // 요청 날짜에 진행 중인 축제 필터링
-        List<FestivalDto> ongoingFestivals = eventService.fetchFestivals(date);
+        List<Festival> ongoingFestivals = eventService.getFestivalsByDate(date);
 
         return ongoingFestivals;
     }
 
-//    @Hidden
-//    @GetMapping("/movie")
-//    public List<MovieDto> getMovie() throws Exception {
-//        return eventService.fetchMovies();
+//    @GetMapping("/performance")
+//    public List<PerformanceDto> getPerformance(HttpServletRequest request) throws Exception {
+//
+//        String date = request.getParameter("date");
+//        // 요청 날짜에 진행 중인 공연 필터링
+//        List<PerformanceDto> ongoingPerformances = eventService.fetchPerformance(date);
+//
+//        return ongoingPerformances;
 //    }
-
-    @Hidden
-    @GetMapping("/performance")
-    public List<PerformanceDto> getPerformance(HttpServletRequest request) throws Exception {
-        return eventService.fetchPerformance();
-    }
 
 }

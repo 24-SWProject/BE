@@ -6,14 +6,17 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.config.error.ErrorCode;
-import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.FestivalDto;
-import com.swproject.hereforus.dto.MovieDto;
 import com.swproject.hereforus.dto.PerformanceDto;
+import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.entity.Festival;
+import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.repository.FestivalRepository;
+import com.swproject.hereforus.repository.PerformanceRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 
 @Service
@@ -35,10 +39,21 @@ public class EventService {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
     private EnvConfig envConfig;
 
-    /** 서울시 문화 행사 데이터 호출 */
-    public List<FestivalDto> fetchFestivals(String requestedDate) throws Exception {
+    @Autowired
+    private FestivalRepository festivalRepository;
+
+    @Autowired
+    private PerformanceRepository performanceRepository;
+
+
+    /** 축제 데이터 호출 및 업데이트 */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void fetchFestivals() {
         try {
             int start = 1;
             int end = 1000;
@@ -61,97 +76,65 @@ public class EventService {
                 } else {
                     for (JsonNode item : items) {
                         FestivalDto festival = objectMapper.readValue(item.toString(), FestivalDto.class);
-
-                        // 날짜 조건에 맞는 축제만 추가
-                        if (isOnGoingByDate(festival.getOpenDate(), festival.getEndDate(), requestedDate)) {
-                            festivalList.add(festival);
-                        }
-
+                        saveOrUpdateFestival(festival);
+                        festivalList.add(festival);
                     }
                     start += 1000;
                     end += 1000;
                 }
             }
-
-            System.out.println(festivalList);
-            return festivalList;
         } catch (Exception e) {
             e.printStackTrace();
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
-    /** 행사가 현재 날짜 기점으로 진행 중인지 확인 */
-    public boolean isOnGoingToday(FestivalDto festival) {
-        LocalDate date = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+    /** 공연 데이터 호출 */
+/*
+    public List<PerformanceDto> fetchPerformance(String requestedDate) {
+        try {
+            int pageNum = 1;
 
-        LocalDate startDate = LocalDate.parse(festival.getOpenDate(), formatter);
-        LocalDate endDate = LocalDate.parse(festival.getEndDate(), formatter);
+            List<PerformanceDto> performanceList = new ArrayList<>();
+            boolean hasMoreData = true;
 
-        return (date.isEqual(startDate) || date.isAfter(startDate)) && date.isBefore(endDate);
-    }
+            while (hasMoreData) {
+                String url = UriComponentsBuilder
+                        .fromUriString(envConfig.getPerformanceBaseUrl())
+                        .queryParam("cpage", pageNum)
+                        .toUriString();
+                System.out.println(url);
 
-    /** 행사가 사용자가 요청한 날짜 기점으로 진행 중인지 확인 */
-    public boolean isOnGoingAtRequestedDate(FestivalDto festival, String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                XmlMapper xmlMapper = new XmlMapper();
 
-        LocalDate requestedDate = LocalDate.parse(date, formatter);
-        LocalDate startDate = LocalDate.parse(festival.getOpenDate(), formatter);
-        LocalDate endDate = LocalDate.parse(festival.getEndDate(), formatter);
+                String response = restTemplate.getForObject(url, String.class);
+                JsonNode rootNode = xmlMapper.readTree(response);
+                JsonNode items = rootNode.path("db");
+                System.out.println(items);
 
-        return (requestedDate.isEqual(startDate) || requestedDate.isAfter(startDate)) && requestedDate.isBefore(endDate);
-    }
+                if (items.isEmpty()) {
+                    hasMoreData = false;
+                } else {
+                    for (JsonNode item : items) {
+                        PerformanceDto performance = objectMapper.readValue(item.toString(), PerformanceDto.class);
 
-    /** 일별 박스오피스 영화 데이터 호출*/
-    public List<MovieDto> fetchMovies() throws Exception {
+                        // 날짜 조건에 맞는 공연만 추가
+                        if (isOnGoingByDate(performance.getOpenDate(), performance.getEndDate(), requestedDate)) {
+                            performanceList.add(performance);
+                        }
 
-        LocalDate date = LocalDate.now().minusDays(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        String formattedDate = date.format(formatter);
-
-        List<MovieDto> movieList = new ArrayList<>();
-
-        String url = UriComponentsBuilder
-                .fromUriString(envConfig.getMovieBaseUrl())
-                .queryParam("key", envConfig.getMovieKey())
-                .queryParam("targetDt", formattedDate)
-                .toUriString();
-
-        String response = restTemplate.getForObject(url, String.class);
-        JsonNode rootNode = objectMapper.readTree(response);
-        JsonNode items = rootNode.path("boxOfficeResult").path("dailyBoxOfficeList");
-
-        for (JsonNode item : items) {
-            MovieDto movie = objectMapper.readValue(item.toString(), MovieDto.class);
-            movieList.add(movie);
+                    }
+                    pageNum += 1;
+                }
+            }
+            System.out.println(performanceList);
+            return performanceList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-
-        return movieList;
     }
-
-    /** 현재 진행 중인 공연 데이터 호출 */
-    public List<PerformanceDto> fetchPerformance() throws Exception {
-
-        List<PerformanceDto> performanceList = new ArrayList<>();
-
-        String response = restTemplate.getForObject(envConfig.getPerformanceBaseUrl(), String.class);
-
-        XmlMapper xmlMapper = new XmlMapper();
-        JsonNode rootNode = xmlMapper.readTree(response);
-        JsonNode items = rootNode.path("db");
-
-        for (JsonNode item : items) {
-            PerformanceDto performance = xmlMapper.treeToValue(item, PerformanceDto.class);
-            performanceList.add(performance);
-        }
-
-        return performanceList;
-    }
-
-    // 오늘 상영 영화
-    // 날짜 받은 후 진행중인 공연
-    // performance url에서 받은 날짜 필터링
+*/
 
     /** 공연이 사용자가 요청한 날짜 기점으로 진행 중인지 확인 */
     public boolean isOnGoingByDate(String openDate, String endDate, String requestedDate) {
@@ -159,7 +142,7 @@ public class EventService {
             // 여러 날짜 형식을 처리할 수 있는 Formatter 생성
             DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                     .appendOptional(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"))
-                    .appendOptional(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    .appendOptional(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
                     .appendOptional(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     .appendOptional(DateTimeFormatter.ofPattern("yyyyMMdd"))
                     .toFormatter();
@@ -175,5 +158,31 @@ public class EventService {
         }
     }
 
-    // 날짜 받은 후 진행중인 축제
+    public void saveOrUpdateFestival(FestivalDto festivalInfo) {
+        Optional<Festival> optionalFestival  = festivalRepository.findByTitle(festivalInfo.getTitle());
+        if (optionalFestival.isPresent()) {
+            Festival festival = optionalFestival.get();
+            modelMapper.map(festivalInfo, festival);
+            festivalRepository.save(festival);
+        } else {
+            Festival festival = modelMapper.map(festivalInfo, Festival.class);
+            festivalRepository.save(festival);
+        }
+    }
+
+    public List<Festival> getFestivalsByDate(String requestedDate) {
+        // 여러 날짜 형식을 처리할 수 있는 Formatter 생성
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                .appendOptional(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"))
+                .appendOptional(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+                .appendOptional(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                .appendOptional(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                .toFormatter();
+
+        // 요청된 날짜를 LocalDate로 변환
+        LocalDate date = LocalDate.parse(requestedDate, formatter);
+
+        // 특정 날짜에 해당하는 축제 목록 조회
+        return festivalRepository.findFestivalsByDate(date);
+    }
 }

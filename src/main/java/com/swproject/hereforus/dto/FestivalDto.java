@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,8 +43,8 @@ public class FestivalDto {
     private String endDate;
 
     @JsonProperty("LOT")
-    private String GPSy;
+    private String gpsY;
 
     @JsonProperty("LAT")
-    private String GPSx;
+    private String gpsX;
 }
