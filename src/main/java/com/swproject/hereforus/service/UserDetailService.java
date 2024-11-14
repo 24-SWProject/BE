@@ -13,7 +13,6 @@ public class UserDetailService implements UserDetailsService {
 
     @Override
     public User loadUserByUsername(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException(email));
+        return userRepository.findByEmail(email).orElse(null);
     }
 }

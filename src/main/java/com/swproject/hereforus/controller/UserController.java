@@ -1,10 +1,17 @@
 package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
+import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.repository.UserRepository;
 import com.swproject.hereforus.service.UserService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+@Tag(name = "User", description = "회원 관련 REST API에 대한 명세를 제공합니다. ")
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -28,14 +36,23 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Operation(
+            summary = "로그인 및 회원가입",
+            description = "네이버 소셜 로그인을 통한 로그인 및 회원가입 통합 서비스입니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = JwtDto.class))),
+                    @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}")))
+            }
+    )
     @GetMapping("/user/login")
     public void getCodeStatus(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchNaverUrl();
         response.sendRedirect(loginUrl);
     }
 
+    @Hidden
     @GetMapping(value = "/naver/auth", produces = "application/json")
-    public ResponseEntity<JwtDto> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state, HttpServletResponse httpServletResponse) throws IOException {
+    public ResponseEntity<?> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state, HttpServletResponse httpServletResponse) throws IOException {
         try {
             // Code를 사용해 토큰을 요청
             String token = userService.CodeToToken(code, state);
@@ -64,10 +81,12 @@ public class UserController {
             return ResponseEntity.ok(jwtDto);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            ErrorDto errorResponse = new ErrorDto("로그인 중 문제가 발생했습니다. 다시 시도해 주세요.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
+    @Hidden
     @GetMapping(value = "/user/logout", produces = "application/json")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
