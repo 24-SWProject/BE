@@ -37,8 +37,8 @@ public class UserController {
     private UserRepository userRepository;
 
     @Operation(
-            summary = "로그인 및 회원가입",
-            description = "네이버 소셜 로그인을 통한 로그인 및 회원가입 통합 서비스입니다.",
+            summary = "네이버 로그인 및 회원가입",
+            description = "네이버 소셜 로그인을 통해 로그인 및 회원가입을 할 수 있습니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = JwtDto.class))),
                     @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}")))

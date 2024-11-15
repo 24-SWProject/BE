@@ -21,6 +21,9 @@ public class PerformanceDto {
     @JsonProperty("prfpdto") // 공연 종료 날짜
     private String endDate;
 
+    @JsonProperty("prfstate") // 공연 종료 날짜
+    private String state;
+
     @JsonProperty("fcltynm") // 공연 장소
     private String place;
 

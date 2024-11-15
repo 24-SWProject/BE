@@ -16,19 +16,24 @@ import java.util.List;
 @Entity
 public class Performance {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String title;
 
-    private LocalDate openDate;
+    @Column(columnDefinition = "DATE")
+    private String openDate;
 
-    private LocalDate endDate;
+    @Column(columnDefinition = "DATE")
+    private String endDate;
 
+    private String state;
+
+    @Column(columnDefinition = "TEXT")
     private String place;
 
+    @Column(columnDefinition = "TEXT")
     private String poster;
 
     private String category;

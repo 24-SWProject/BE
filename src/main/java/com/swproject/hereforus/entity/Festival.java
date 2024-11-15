@@ -20,7 +20,7 @@ public class Festival {
     @Column(updatable = false)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String title;
 
     private String guName;
@@ -39,10 +39,13 @@ public class Festival {
     @Column(columnDefinition = "TEXT")
     private String poster;
 
+    @Column(columnDefinition = "DATE")
     private String registerDate;
 
+    @Column(columnDefinition = "DATE")
     private String openDate;
 
+    @Column(columnDefinition = "DATE")
     private String endDate;
 
     private String gpsX;
