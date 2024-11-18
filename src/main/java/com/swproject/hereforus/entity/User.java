@@ -1,5 +1,6 @@
 package com.swproject.hereforus.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +31,10 @@ public class User implements UserDetails {
 
     private String birthDate;
 
+    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Group group;
+
     @Builder
     public User(String email, String nickname, String profileImg, String birthYear, String birthDate) {
         this.email = email;
@@ -47,6 +52,10 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    public Long getUserId() {
+        return id;
     }
 
     @Override

@@ -3,8 +3,11 @@ package com.swproject.hereforus.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swproject.hereforus.config.EnvConfig;
-import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.config.error.CustomException;
+import com.swproject.hereforus.config.error.ErrorCode;
 import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.entity.Group;
+import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import java.io.IOException;
 @PropertySource("classpath:env.properties")
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class UserService {
 
     private final RestTemplate restTemplate;
@@ -86,24 +90,34 @@ public class UserService {
                 .build();
     }
 
-
     // dto -> entity 로 변환 후 저장 & entity -> dto로 변환 후 출력
+    @Transactional
     public UserDto createUser(UserDto userInfo) {
-        User user = User.builder()
-                .email(userInfo.getEmail())
-                .nickname(userInfo.getNickname())
-                .profileImg(userInfo.getProfileImg())
-                .birthYear(userInfo.getBirthYear())
-                .birthDate(userInfo.getBirthDate())
-                .build();
+        try {
+            // User 생성
+            User user = User.builder()
+                    .email(userInfo.getEmail())
+                    .nickname(userInfo.getNickname())
+                    .profileImg(userInfo.getProfileImg())
+                    .birthYear(userInfo.getBirthYear())
+                    .birthDate(userInfo.getBirthDate())
+                    .build();
 
-        User savedUser = userRepository.save(user); // User 객체 저장
+            // Group 생성
+            Group group = Group.builder()
+                    .owner(user)
+                    .build();
+            user.setGroup(group);
 
-        return modelMapper.map(savedUser, UserDto.class);
+            User savedUser = userRepository.save(user);
+
+            return modelMapper.map(savedUser, UserDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
-        public static void deleteUser() {
 
-    }
 
 }

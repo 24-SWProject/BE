@@ -4,6 +4,7 @@ import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
 import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Tag(name = "User", description = "회원 관련 REST API에 대한 명세를 제공합니다. ")
 @RestController
@@ -62,8 +64,12 @@ public class UserController {
             System.out.println(profile);
             System.out.println(profile.getEmail());
 
-            if (userRepository.findByEmail(profile.getEmail()) == null) {
-                userService.createUser(profile);
+            Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
+            if (existingUser.isPresent()) {
+                System.out.println("User already exists: " + existingUser.get());
+            } else {
+                UserDto savedUser = userService.createUser(profile);
+                System.out.println("Saved user: " + savedUser);
             }
 
             // 액세스 토큰 생성
