@@ -105,7 +105,7 @@ public class UserService {
 
             // Group 생성
             Group group = Group.builder()
-                    .owner(user)
+                    .inviter(user)
                     .build();
             user.setGroup(group);
 

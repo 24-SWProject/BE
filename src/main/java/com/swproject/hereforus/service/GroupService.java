@@ -1,13 +1,12 @@
 package com.swproject.hereforus.service;
 
+import com.swproject.hereforus.dto.GroupCodeDto;
 import com.swproject.hereforus.dto.GroupDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.GroupRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,15 +19,37 @@ public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
 
-    public Optional<GroupDto> getGroup() {
-        Long userId = getAuthenticatedUserId(); // 인증된 사용자 ID 가져오기
-        Optional<Group> group  = groupRepository.findByOwnerId(userId);
+    @Autowired
+    private UserDetailService userDetailService;
+
+    // 그룹 코드 조회
+    public Optional<GroupCodeDto> fetchGroupCode() {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupRepository.findByUserId(user.getId());
+        return group.map(g -> modelMapper.map(g, GroupCodeDto.class));
+    }
+
+    // 그룹 프로필 조회
+    public Optional<GroupDto> fetchGroupProfile() {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupRepository.findByUserId(user.getId());
         return group.map(g -> modelMapper.map(g, GroupDto.class));
     }
 
-    private Long getAuthenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User authenticatedUser = (User) authentication.getPrincipal();
-        return authenticatedUser.getId();
+    // 그룹 프로필 수정
+    // inviter 찾아서 그 group에 저장
+    public GroupDto saveGroupProfile(GroupDto groupDto) {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupRepository.findByUserId(user.getId());
+        Group existingGroup = group.get();
+
+        existingGroup.setNickName(groupDto.getNickName());
+        existingGroup.setAnniversary(groupDto.getAnniversary());
+        existingGroup.setProfileImg(groupDto.getProfileImg());
+
+        Group updatedGroup = groupRepository.save(existingGroup);
+
+        return modelMapper.map(updatedGroup, GroupDto.class);
     }
 }
+

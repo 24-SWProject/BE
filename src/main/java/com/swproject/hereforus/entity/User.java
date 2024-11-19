@@ -3,10 +3,13 @@ package com.swproject.hereforus.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,9 +34,21 @@ public class User implements UserDetails {
 
     private String birthDate;
 
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "inviter", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Group group;
+
+    @CreationTimestamp
+    @Column(name= "createdAt", nullable = false, updatable = false)
+    private LocalDate createdAt;
+
+    @CreationTimestamp
+    @Column(name= "updatedAt", nullable = false)
+    private LocalDate updatedAt;
+
+    @CreationTimestamp
+    @Column(name= "deletedAt")
+    private LocalDate deletedAt;
 
     @Builder
     public User(String email, String nickname, String profileImg, String birthYear, String birthDate) {
@@ -52,10 +67,6 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
-    }
-
-    public Long getUserId() {
-        return id;
     }
 
     @Override

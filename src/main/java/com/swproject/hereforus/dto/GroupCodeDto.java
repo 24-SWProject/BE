@@ -10,8 +10,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GroupDto {
-    private String nickName;
-    private LocalDate anniversary;
-    private String profileImg;
+public class GroupCodeDto {
+    private String id;
 }
