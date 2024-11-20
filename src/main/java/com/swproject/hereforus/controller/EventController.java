@@ -16,6 +16,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +43,7 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보를 조회합니다. 데이터는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "축제 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Festival.class))),
+                            responseCode = "200", description = "축제 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(
                             responseCode = "404", description = "축제 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"축제 데이터 조회를 실패하였습니다.\"}"))
                     )
@@ -50,14 +53,27 @@ public class EventController {
                             name = "date",
                             description = "요청 날짜(yyyy-MM-dd 형식). 해당 날짜를 기준으로 축제 정보를 반환합니다.",
                             example = "2024-11-14"
+                    ),
+                    @Parameter(
+                            name = "page",
+                            description = "요청한 페이지 수에 따른 축제 정보를 반환합니다.",
+                            example = "1"
+                    ),
+                    @Parameter(
+                            name = "size",
+                            description = "요청 개수에 따른 축제 정보를 반환합니다.",
+                            example = "10"
                     )
             }
     )
     @GetMapping("/festival")
     public ResponseEntity<?> getFestival(
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws Exception {
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) throws Exception {
         try {
-            List<Festival> festivals = eventService.getFestivalsByDate(date);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Festival> festivals = eventService.getFestivalsByDate(date, pageable);
             return ResponseEntity.ok(festivals);
         } catch (Exception e) {
             e.printStackTrace();
@@ -71,7 +87,7 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보를 조회합니다. 데이터는 공연예술통합전산망에서 제공되며, 공연의 제목, 장소, 시작일, 종료일, 카테고리(예: 뮤지컬, 연극) 및 포스터 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "공연 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Festival.class))),
+                            responseCode = "200", description = "공연 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(
                             responseCode = "404", description = "공연 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"공연 데이터 조회를 실패하였습니다.\"}"))
                     )
@@ -81,14 +97,27 @@ public class EventController {
                             name = "date",
                             description = "요청 날짜(yyyy-MM-dd 형식). 해당 날짜를 기준으로 공연 정보를 반환합니다.",
                             example = "2024-11-14"
+                    ),
+                    @Parameter(
+                            name = "page",
+                            description = "요청한 페이지 수에 따른 축제 정보를 반환합니다.",
+                            example = "1"
+                    ),
+                    @Parameter(
+                            name = "size",
+                            description = "요청 개수에 따른 축제 정보를 반환합니다.",
+                            example = "10"
                     )
             }
     )
     @GetMapping("/performance")
     public ResponseEntity<?> getPerformance(
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws Exception {
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) throws Exception {
         try {
-            List<Performance> performances = eventService.getPerformanceByDate(date);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Performance> performances = eventService.getPerformanceByDate(date, pageable);
             return ResponseEntity.ok(performances);
         } catch (Exception e) {
             e.printStackTrace();

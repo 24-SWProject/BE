@@ -51,5 +51,9 @@ public class GroupService {
 
         return modelMapper.map(updatedGroup, GroupDto.class);
     }
+
+
+    // 받은 초대코드로 그룹 id 조회, 있으면 현재 사용자를 invitee로 저장
+
 }
 

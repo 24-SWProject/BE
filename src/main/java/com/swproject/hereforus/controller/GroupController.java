@@ -30,10 +30,10 @@ public class GroupController {
 
     @Operation(
             summary = "그룹 코드 조회",
-            description = "회원 등록 시 생성된 그룹 코드를 조회합니다. 그룹 코드를 통해 상대방을 초대하거나, 상대방으로부터 초대받을 수 있습니다.",
+            description = "그룹 생성 시 발급된 고유 그룹 코드를 조회합니다. 이 코드는 다른 사용자를 그룹에 초대하거나 초대를 받을 때 사용됩니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
-                    @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 코드 조회를 실패하였습니다.\"}")))
+                    @ApiResponse(responseCode = "200", description = "그룹 코드 조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                    @ApiResponse(responseCode = "404", description = "그룹 코드 조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 코드 조회를 실패하였습니다.\"}")))
             }
     )
     @ResponseBody
@@ -51,10 +51,10 @@ public class GroupController {
 
     @Operation(
             summary = "그룹 프로필 조회",
-            description = "그룹의 프로필을 조회할 수 있습니다. 그룹 닉네임, 기념일, 대표 이미지 등이 있습니다.",
+            description = "현재 그룹의 프로필 정보를 확인합니다. 그룹 닉네임, 기념일, 대표 이미지와 같은 세부 정보를 포함합니다",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
-                    @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 프로필 조회를 실패하였습니다.\"}")))
+                    @ApiResponse(responseCode = "200", description = "그룹 프로필 조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                    @ApiResponse(responseCode = "404", description = "그룹 프로필 조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 프로필 조회를 실패하였습니다.\"}")))
             }
     )
     @GetMapping
@@ -71,10 +71,10 @@ public class GroupController {
 
     @Operation(
             summary = "그룹 프로필 수정",
-            description = "그룹의 프로필을 수정할 수 있습니다. 그룹을 생성한 사용자(초대자)가 그룹 닉네임, 기념일, 대표 이미지를 선택적으로 수정할 수 있습니다.",
+            description = "그룹 초대자가 그룹 닉네임, 기념일, 대표 이미지를 수정할 수 있습니다. 선택적으로 원하는 항목만 변경할 수 있습니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
-                    @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 프로필 조회를 실패하였습니다.\"}")))
+                    @ApiResponse(responseCode = "200", description = "그룹 프로필 수정 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                    @ApiResponse(responseCode = "404", description = "그룹 프로필 수정 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 프로필 수정에 실패하였습니다.\"}")))
             }
     )
     @PutMapping
@@ -84,7 +84,7 @@ public class GroupController {
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("그룹 프로필 조회를 실패하였습니다.");
+            ErrorDto errorResponse = new ErrorDto("그룹 프로필 수정에 실패하였습니다.");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
@@ -92,10 +92,10 @@ public class GroupController {
     @Hidden
     @Operation(
             summary = "그룹 참여",
-            description = "초대자로부터 받은 코드를 통해 그룹에 참여할 수 있습니다. 최대 인원은 2명입니다.",
+            description = "다른 사용자로부터 제공받은 그룹 코드를 사용하여 그룹에 참여합니다. 그룹의 최대 구성원은 2명입니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
-                    @ApiResponse(responseCode = "404", description = "조회 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 프로필 조회를 실패하였습니다.\"}")))
+                    @ApiResponse(responseCode = "200", description = "그룹 참여 성공", content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                    @ApiResponse(responseCode = "404", description = "그룹 참여 실패", content = @Content(schema = @Schema(example = "{\"error\":\"그룹 참여에 실패하였습니다.\"}")))
             }
     )
     @PostMapping

@@ -15,6 +15,8 @@ import com.swproject.hereforus.repository.PerformanceRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -149,12 +151,12 @@ public class EventService {
         }
     }
 
-    public List<Festival> getFestivalsByDate(String date) {
-        return festivalRepository.findFestivalsByDate(date);
+    public Page<Festival> getFestivalsByDate(String date, Pageable pageable) {
+        return festivalRepository.findFestivalsByDate(date, pageable);
     }
 
-    public List<Performance> getPerformanceByDate(String date) {
-        return performanceRepository.findPerformancesByDate(date);
+    public Page<Performance> getPerformanceByDate(String date, Pageable pageable) {
+        return performanceRepository.findPerformancesByDate(date, pageable);
     }
 
 }
