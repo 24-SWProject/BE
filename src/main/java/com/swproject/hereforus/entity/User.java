@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +19,8 @@ import java.util.List;
 @Table(name="user")
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Entity
 public class User implements UserDetails {
     @Id
@@ -46,9 +51,8 @@ public class User implements UserDetails {
     @Column(name= "updatedAt", nullable = false)
     private LocalDate updatedAt;
 
-    @CreationTimestamp
-    @Column(name= "deletedAt")
-    private LocalDate deletedAt;
+    @Column(name = "deletedAt")
+    private LocalDate deletedAt = null;
 
     @Builder
     public User(String email, String nickname, String profileImg, String birthYear, String birthDate) {

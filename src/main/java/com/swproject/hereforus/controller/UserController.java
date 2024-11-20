@@ -2,7 +2,6 @@ package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.ErrorDto;
-import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
@@ -16,11 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -29,21 +27,26 @@ import java.util.Optional;
 @Tag(name = "User", description = "회원 관련 REST API에 대한 명세를 제공합니다. ")
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @Operation(
             summary = "네이버 로그인 및 회원가입",
-            description = "네이버 소셜 로그인을 통해 로그인 및 회원가입을 할 수 있습니다.",
+            description = "네이버 소셜 로그인 기능을 사용해 간편하게 로그인하거나 새로운 계정을 생성할 수 있습니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(example = "{\"message\":\"로그인이 완료되었습니다.\"}"))),
-                    @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}")))
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "로그인 성공",
+                            content = @Content(schema = @Schema(example = "{\"message\":\"네이버 로그인이 완료되었습니다.\"}"))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "로그인 실패",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}"))
+                    )
             }
     )
     @GetMapping("/user/login")
@@ -54,7 +57,7 @@ public class UserController {
 
     @Hidden
     @GetMapping(value = "/naver/auth", produces = "application/json")
-    public ResponseEntity<?> getToken(@RequestParam(value="code") String code, @RequestParam(value="state") String state, HttpServletResponse httpServletResponse) throws IOException {
+    public ResponseEntity<?> getToken(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
         try {
             // Code를 사용해 토큰을 요청
             String token = userService.CodeToToken(code, state);
@@ -67,7 +70,7 @@ public class UserController {
             // 유저 중복 확인
             Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
             if (!existingUser.isPresent()) {
-               userService.createUser(profile);
+                userService.createUser(profile);
             }
 
             // 액세스 토큰 생성
@@ -79,10 +82,7 @@ public class UserController {
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
-//            // JwtDto 객체 생성
-//            JwtDto jwtDto = new JwtDto("Bearer", accessToken, refreshToken);
-
-            return ResponseEntity.ok("로그인이 완료되었습니다.");
+            return ResponseEntity.ok("네이버 로그인이 완료되었습니다.");
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto("로그인 중 문제가 발생했습니다. 다시 시도해 주세요.");
@@ -90,10 +90,59 @@ public class UserController {
         }
     }
 
-    @Hidden
+    @Operation(
+            summary = "로그아웃",
+            description = "JWT 방식으로 인증된 사용자의 로그아웃을 처리합니다. 클라이언트가 보유한 액세스 및 리프레시 토큰을 삭제하여 로그아웃을 완료합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "로그아웃 성공",
+                            content = @Content(schema = @Schema(example = "{\"message\":\"로그아웃이 완료되었습니다.\"}"))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "로그아웃 실패",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"로그아웃 중 문제가 발생했습니다. 다시 시도해 주세요.\"}"))
+                    )
+            }
+    )
     @GetMapping(value = "/user/logout", produces = "application/json")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            SecurityContextHolder.clearContext();
+            return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto("로그아웃 중 문제가 발생했습니다. 다시 시도해 주세요.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Operation(
+            summary = "회원 탈퇴",
+            description = "회원 탈퇴를 요청하면 계정 정보와 연결된 그룹 데이터가 함께 삭제(소프트 삭제)됩니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 탈퇴 성공",
+                            content = @Content(schema = @Schema(example = "{\"message\":\"회원 탈퇴가 성공적으로 처리되었습니다.\"}"))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "회원 탈퇴 실패",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"회원 탈퇴 중 문제가 발생했습니다.\"}"))
+                    )
+            }
+    )
+    @DeleteMapping("user")
+    public ResponseEntity<?> deleteUser() {
+        try {
+            userService.withdrawUser();
+            return ResponseEntity.ok("회원 탈퇴가 성공적으로 처리되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto("회원 탈퇴 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }

@@ -5,22 +5,22 @@ import com.swproject.hereforus.dto.GroupDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.GroupRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+
+@Configuration
+@RequiredArgsConstructor
 @Service
 public class GroupService {
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private GroupRepository groupRepository;
-
-    @Autowired
-    private UserDetailService userDetailService;
+    private final ModelMapper modelMapper;
+    private final GroupRepository groupRepository;
+    private final UserDetailService userDetailService;
 
     // 그룹 코드 조회
     public Optional<GroupCodeDto> fetchGroupCode() {

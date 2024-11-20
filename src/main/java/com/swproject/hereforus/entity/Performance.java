@@ -16,6 +16,7 @@ import java.util.List;
 @Entity
 public class Performance {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private String id;
 

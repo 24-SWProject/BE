@@ -8,10 +8,12 @@ import com.swproject.hereforus.config.error.ErrorCode;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.repository.GroupRepository;
 import com.swproject.hereforus.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
@@ -20,6 +22,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 @Configuration
 @PropertySource("classpath:env.properties")
@@ -33,6 +37,8 @@ public class UserService {
     private final EnvConfig envConfig;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final UserDetailService userDetailService;
+    private final GroupRepository groupRepository;
 
 
     public String fetchNaverUrl() {
@@ -118,9 +124,11 @@ public class UserService {
         }
     }
 
-
     // user 탈퇴
-
+    public void withdrawUser() {
+        User user = userDetailService.getAuthenticatedUserId();
+        userRepository.deleteById(user.getId());
+    }
 
 
 }

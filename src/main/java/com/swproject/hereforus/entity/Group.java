@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -13,6 +15,8 @@ import java.time.LocalDate;
 @Table(name="user_group")
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE user_group SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Entity
 public class Group {
     @Id
@@ -45,9 +49,8 @@ public class Group {
     @Column(name= "updatedAt", nullable = false)
     private LocalDate updatedAt;
 
-    @CreationTimestamp
-    @Column(name= "deletedAt")
-    private LocalDate deletedAt;
+    @Column(name = "deletedAt")
+    private LocalDate deletedAt = null;
 
     @Builder
     public Group(User inviter, String nickName, LocalDate anniversary, String profileImg) {

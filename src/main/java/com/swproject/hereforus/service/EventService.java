@@ -88,7 +88,7 @@ public class EventService {
     }
 
     /** 공연 데이터 호출 및 업데이트 */
-    @Scheduled(cron = "0 39 11 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void fetchPerformances() {
         try {
             int pageNum = 1;

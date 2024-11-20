@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,10 +31,9 @@ import java.util.List;
 @Tag(name = "Event", description = "서울특별시의 행사 관련 REST API에 대한 명세를 제공합니다. 사용자가 요청한 날짜를 기준으로 진행 중인 행사를 조회합니다.")
 @RestController
 @RequestMapping("/api/event")
+@RequiredArgsConstructor
 public class EventController {
-
-    @Autowired
-    private EventService eventService;
+    private final EventService eventService;
 
     @Operation(
             summary = "축제 조회",
@@ -96,5 +96,4 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
-
 }
