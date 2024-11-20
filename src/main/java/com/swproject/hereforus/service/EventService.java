@@ -84,7 +84,6 @@ public class EventService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -122,7 +121,6 @@ public class EventService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

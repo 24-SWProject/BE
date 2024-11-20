@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-@Table(name="performances")
+@Table(name="performance")
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity

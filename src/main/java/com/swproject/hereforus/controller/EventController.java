@@ -1,5 +1,6 @@
 package com.swproject.hereforus.controller;
 
+import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.FestivalDto;
 import com.swproject.hereforus.dto.JwtDto;
 import com.swproject.hereforus.entity.Festival;
@@ -15,6 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,18 +40,9 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보를 조회합니다. 데이터는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "성공적으로 축제 데이터를 반환합니다.",
-                            content = @Content(schema = @Schema(implementation = Festival.class))),
+                            responseCode = "200", description = "축제 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Festival.class))),
                     @ApiResponse(
-                            responseCode = "400",
-                            description = "잘못된 요청 파라미터입니다.",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"날짜 형식이 잘못되었습니다. yyyy-MM-dd 형식을 사용하세요.\"}"))
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "서버 내부 오류 발생.",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"서버 처리 중 문제가 발생했습니다.\"}"))
+                            responseCode = "404", description = "축제 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"축제 데이터 조회를 실패하였습니다.\"}"))
                     )
             },
             parameters = {
@@ -60,10 +54,16 @@ public class EventController {
             }
     )
     @GetMapping("/festival")
-    public List<Festival> getFestival(
+    public ResponseEntity<?> getFestival(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws Exception {
-
-        return eventService.getFestivalsByDate(date);
+        try {
+            List<Festival> festivals = eventService.getFestivalsByDate(date);
+            return ResponseEntity.ok(festivals);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto("축제 데이터 조회를 실패하였습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
 
     @Operation(
@@ -71,18 +71,9 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보를 조회합니다. 데이터는 공연예술통합전산망에서 제공되며, 공연의 제목, 장소, 시작일, 종료일, 카테고리(예: 뮤지컬, 연극) 및 포스터 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
-                            description = "성공적으로 공연 데이터를 반환합니다.",
-                            content = @Content(schema = @Schema(implementation = Performance.class))),
+                            responseCode = "200", description = "공연 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Festival.class))),
                     @ApiResponse(
-                            responseCode = "400",
-                            description = "잘못된 요청 파라미터입니다.",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"날짜 형식이 잘못되었습니다. yyyy-MM-dd 형식을 사용하세요.\"}"))
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "서버 내부 오류 발생.",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"서버 처리 중 문제가 발생했습니다.\"}"))
+                            responseCode = "404", description = "공연 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"공연 데이터 조회를 실패하였습니다.\"}"))
                     )
             },
             parameters = {
@@ -94,9 +85,16 @@ public class EventController {
             }
     )
     @GetMapping("/performance")
-    public List<Performance> getPerformance(
+    public ResponseEntity<?> getPerformance(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws Exception {
-        return eventService.getPerformanceByDate(date);
+        try {
+            List<Performance> performances = eventService.getPerformanceByDate(date);
+            return ResponseEntity.ok(performances);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto("축제 데이터 조회를 실패하였습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
 
 }

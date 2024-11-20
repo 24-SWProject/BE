@@ -42,7 +42,7 @@ public class UserController {
             summary = "네이버 로그인 및 회원가입",
             description = "네이버 소셜 로그인을 통해 로그인 및 회원가입을 할 수 있습니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = JwtDto.class))),
+                    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(example = "{\"message\":\"로그인이 완료되었습니다.\"}"))),
                     @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}")))
             }
     )
@@ -64,12 +64,10 @@ public class UserController {
             System.out.println(profile);
             System.out.println(profile.getEmail());
 
+            // 유저 중복 확인
             Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
-            if (existingUser.isPresent()) {
-                System.out.println("User already exists: " + existingUser.get());
-            } else {
-                UserDto savedUser = userService.createUser(profile);
-                System.out.println("Saved user: " + savedUser);
+            if (!existingUser.isPresent()) {
+               userService.createUser(profile);
             }
 
             // 액세스 토큰 생성
@@ -81,10 +79,10 @@ public class UserController {
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
-            // JwtDto 객체 생성
-            JwtDto jwtDto = new JwtDto("Bearer", accessToken, refreshToken);
+//            // JwtDto 객체 생성
+//            JwtDto jwtDto = new JwtDto("Bearer", accessToken, refreshToken);
 
-            return ResponseEntity.ok(jwtDto);
+            return ResponseEntity.ok("로그인이 완료되었습니다.");
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto("로그인 중 문제가 발생했습니다. 다시 시도해 주세요.");

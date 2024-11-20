@@ -26,6 +26,7 @@ public class UserDetailService implements UserDetailsService {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User user = (User) authentication.getPrincipal();
+            System.out.println(user);
             return user;
         } catch (Exception e) {
             e.printStackTrace();

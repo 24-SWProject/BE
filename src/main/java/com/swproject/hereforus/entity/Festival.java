@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Table(name="festivals")
+@Table(name="festival")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
