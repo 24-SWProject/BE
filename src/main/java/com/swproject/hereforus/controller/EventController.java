@@ -43,9 +43,17 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보를 조회합니다. 데이터는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "축제 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Page.class))),
+                            responseCode = "200",
+                            description = "축제 데이터 조회 성공.",
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(
-                            responseCode = "404", description = "축제 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"축제 데이터 조회를 실패하였습니다.\"}"))
+                            responseCode = "400",
+                            description = "매개변수 누락 및 형식 불일치"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             },
             parameters = {
@@ -69,16 +77,17 @@ public class EventController {
     @GetMapping("/festival")
     public ResponseEntity<?> getFestival(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
-            @RequestParam("page") int page,
-            @RequestParam("size") int size) throws Exception {
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size) {
         try {
+            eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
             Page<Festival> festivals = eventService.getFestivalsByDate(date, pageable);
             return ResponseEntity.ok(festivals);
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("축제 데이터 조회를 실패하였습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
@@ -87,9 +96,17 @@ public class EventController {
             description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보를 조회합니다. 데이터는 공연예술통합전산망에서 제공되며, 공연의 제목, 장소, 시작일, 종료일, 카테고리(예: 뮤지컬, 연극) 및 포스터 정보를 포함합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "공연 데이터 조회 성공.", content = @Content(schema = @Schema(implementation = Page.class))),
+                            responseCode = "200",
+                            description = "공연 데이터 조회 성공.",
+                            content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(
-                            responseCode = "404", description = "공연 데이터 조회 실패.", content = @Content(schema = @Schema(example = "{\"error\":\"공연 데이터 조회를 실패하였습니다.\"}"))
+                            responseCode = "403",
+                            description = "매개변수 누락 및 형식 불일치"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             },
             parameters = {
@@ -113,16 +130,17 @@ public class EventController {
     @GetMapping("/performance")
     public ResponseEntity<?> getPerformance(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
-            @RequestParam("page") int page,
-            @RequestParam("size") int size) throws Exception {
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size) {
         try {
+            eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
             Page<Performance> performances = eventService.getPerformanceByDate(date, pageable);
             return ResponseEntity.ok(performances);
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("축제 데이터 조회를 실패하였습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 }

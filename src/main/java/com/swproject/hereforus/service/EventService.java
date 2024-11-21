@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.error.CustomException;
-import com.swproject.hereforus.config.error.ErrorCode;
 import com.swproject.hereforus.dto.FestivalDto;
 import com.swproject.hereforus.dto.PerformanceDto;
 import com.swproject.hereforus.entity.Festival;
@@ -17,16 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 
@@ -157,6 +154,14 @@ public class EventService {
 
     public Page<Performance> getPerformanceByDate(String date, Pageable pageable) {
         return performanceRepository.findPerformancesByDate(date, pageable);
+    }
+
+    // 이벤트 쿼리 파라미터 확인
+    public String checkEventParameter(String date, Integer page, Integer size) {
+        if (date == null || page == null || size == null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "필수 매개변수를 모두 제공해야 합니다.");
+        }
+        return null;
     }
 
 }

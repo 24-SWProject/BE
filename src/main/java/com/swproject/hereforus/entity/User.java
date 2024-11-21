@@ -33,10 +33,6 @@ public class User implements UserDetails {
 
     private String nickname;
 
-    private String profileImg;
-
-    private String birthYear;
-
     private String birthDate;
 
     @OneToOne(mappedBy = "inviter", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -55,11 +51,9 @@ public class User implements UserDetails {
     private LocalDate deletedAt = null;
 
     @Builder
-    public User(String email, String nickname, String profileImg, String birthYear, String birthDate) {
+    public User(String email, String nickname, String birthDate) {
         this.email = email;
         this.nickname = nickname;
-        this.profileImg = profileImg;
-        this.birthYear = birthYear;
         this.birthDate = birthDate;
     }
 

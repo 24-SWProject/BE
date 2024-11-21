@@ -44,8 +44,8 @@ public class UserController {
                     ),
                     @ApiResponse(
                             responseCode = "500",
-                            description = "로그인 실패",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"로그인 중 문제가 발생했습니다. 다시 시도해 주세요.\"}"))
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             }
     )
@@ -85,7 +85,7 @@ public class UserController {
             return ResponseEntity.ok("네이버 로그인이 완료되었습니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("로그인 중 문제가 발생했습니다. 다시 시도해 주세요.");
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -100,9 +100,13 @@ public class UserController {
                             content = @Content(schema = @Schema(example = "{\"message\":\"로그아웃이 완료되었습니다.\"}"))
                     ),
                     @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
                             responseCode = "500",
-                            description = "로그아웃 실패",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"로그아웃 중 문제가 발생했습니다. 다시 시도해 주세요.\"}"))
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             }
     )
@@ -113,7 +117,7 @@ public class UserController {
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("로그아웃 중 문제가 발생했습니다. 다시 시도해 주세요.");
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -128,9 +132,13 @@ public class UserController {
                             content = @Content(schema = @Schema(example = "{\"message\":\"회원 탈퇴가 성공적으로 처리되었습니다.\"}"))
                     ),
                     @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
                             responseCode = "500",
-                            description = "회원 탈퇴 실패",
-                            content = @Content(schema = @Schema(example = "{\"error\":\"회원 탈퇴 중 문제가 발생했습니다.\"}"))
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             }
     )
@@ -141,7 +149,7 @@ public class UserController {
             return ResponseEntity.ok("회원 탈퇴가 성공적으로 처리되었습니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto("회원 탈퇴 중 오류가 발생했습니다.");
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

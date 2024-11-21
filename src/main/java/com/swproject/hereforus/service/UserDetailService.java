@@ -1,16 +1,14 @@
 package com.swproject.hereforus.service;
 
 import com.swproject.hereforus.config.error.CustomException;
-import com.swproject.hereforus.config.error.ErrorCode;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +28,7 @@ public class UserDetailService implements UserDetailsService {
             return user;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(HttpStatus.FORBIDDEN, "사용자 인증에 실패하였습니다.");
         }
     }
 }

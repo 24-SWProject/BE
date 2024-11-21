@@ -1,19 +1,22 @@
 package com.swproject.hereforus.config.error;
 
+import org.springframework.http.HttpStatus;
+
 public class CustomException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final HttpStatus status;
 
-    public CustomException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+    public CustomException(HttpStatus status, String message) {
+        super(message);
+        this.status = status;
     }
 
-    public int getErrorCode() {
-        return errorCode.getCode();
+    public HttpStatus getStatus() {
+        return status;
     }
 
-    public String getErrorMessage() {
-        return errorCode.getMessage();
+    @Override
+    public String getMessage() {
+        return super.getMessage();
     }
 }

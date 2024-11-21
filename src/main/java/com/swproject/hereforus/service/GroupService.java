@@ -1,5 +1,6 @@
 package com.swproject.hereforus.service;
 
+import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.GroupCodeDto;
 import com.swproject.hereforus.dto.GroupDto;
 import com.swproject.hereforus.entity.Group;
@@ -7,8 +8,8 @@ import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.GroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -47,13 +48,32 @@ public class GroupService {
         existingGroup.setAnniversary(groupDto.getAnniversary());
         existingGroup.setProfileImg(groupDto.getProfileImg());
 
-        Group updatedGroup = groupRepository.save(existingGroup);
+        Group updatedProfile = groupRepository.save(existingGroup);
 
-        return modelMapper.map(updatedGroup, GroupDto.class);
+        return modelMapper.map(updatedProfile, GroupDto.class);
     }
 
+    // 받은 초대코드로 그룹id 조회 및 참여
+    public GroupDto saveInviteeByCode(String code) {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupRepository.findById(code);
+        Group existingGroup = group.get();
 
-    // 받은 초대코드로 그룹 id 조회, 있으면 현재 사용자를 invitee로 저장
+        checkNumberOfGroup(existingGroup, user);
 
+        // 현재 사용자를 invitee로 저장
+        existingGroup.setInvitee(user);
+        Group updatedInvitee = groupRepository.save(existingGroup);
+
+        return modelMapper.map(updatedInvitee, GroupDto.class);
+    }
+
+    // 그룹 참여 최대 2명 제한 확인
+    public String checkNumberOfGroup(Group group, User user) {
+        if (group.getInvitee() != null && group.getInvitee().getId().equals(user.getId())) {
+            throw new CustomException(HttpStatus.CONFLICT, "이미 그룹에 참여하였거나, 그룹 인원이 초과되었습니다.");
+        }
+        return null;
+    }
 }
 
