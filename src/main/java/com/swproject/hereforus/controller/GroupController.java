@@ -22,7 +22,7 @@ import java.util.Optional;
 @Tag(name = "Group", description = "그룹 관련 REST API에 대한 명세를 제공합니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/group")
+@RequestMapping("/api/auth/group")
 public class GroupController {
 
     private final GroupService groupService;

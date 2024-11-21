@@ -1,5 +1,6 @@
 package com.swproject.hereforus.controller;
 
+import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.UserDto;
@@ -32,6 +33,7 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final EnvConfig envConfig;
 
     @Operation(
             summary = "네이버 로그인 및 회원가입",
@@ -56,9 +58,8 @@ public class UserController {
     }
 
     @Hidden
-    @GetMapping(value = "/naver/auth", produces = "application/json")
-    public ResponseEntity<?> getToken(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
-        try {
+    @GetMapping(value = "/user/naver", produces = "application/json")
+    public void getToken(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
             // Code를 사용해 토큰을 요청
             String token = userService.CodeToToken(code, state);
             // 토큰으로 네이버에서 사용자 프로필 조회
@@ -75,19 +76,14 @@ public class UserController {
 
             // 액세스 토큰 생성
             String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
-            httpServletResponse.addHeader("Authorization", "Bearer " + accessToken);
+            httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
 
             // 리프레시 토큰 생성
             String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
-            return ResponseEntity.ok("네이버 로그인이 완료되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+            httpServletResponse.sendRedirect(envConfig.getClientUrl());
     }
 
     @Operation(
@@ -110,7 +106,7 @@ public class UserController {
                     )
             }
     )
-    @GetMapping(value = "/user/logout", produces = "application/json")
+    @GetMapping(value = "/auth/user/logout", produces = "application/json")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
             SecurityContextHolder.clearContext();
@@ -142,7 +138,7 @@ public class UserController {
                     )
             }
     )
-    @DeleteMapping("user")
+    @DeleteMapping("/auth/user")
     public ResponseEntity<?> deleteUser() {
         try {
             userService.withdrawUser();

@@ -44,5 +44,6 @@ public class EnvConfig {
     @Value("${DATABASE_PASSWORD}")
     private String DatabasePassword;
 
-
+    @Value("${CLIENT_URL}")
+    private String ClientUrl;
 }

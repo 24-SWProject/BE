@@ -1,7 +1,6 @@
 package com.swproject.hereforus.config.jwt;
 
 import com.swproject.hereforus.config.EnvConfig;
-import com.swproject.hereforus.dto.UserDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
@@ -95,7 +94,7 @@ public class JwtTokenProvider {
         Cookie cookie = new Cookie(cookieName, cookieValue);
 
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false); // 추후 true로 변경
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60 * 24 * 7);
         return cookie;

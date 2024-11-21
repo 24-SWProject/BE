@@ -75,5 +75,16 @@ public class GroupService {
         }
         return null;
     }
+
+
+    // 현재 사용자가 그룹의 초대자인지 확인
+    public String checkIsInViter() {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupRepository.findByUserId(user.getId());
+        if (!group.get().getInviter().getId().equals(user.getId())) {
+            throw new CustomException(HttpStatus.UNAUTHORIZED, "그룹의 초대자만 접근할 수 있습니다.");
+        }
+        return null;
+    }
 }
 
