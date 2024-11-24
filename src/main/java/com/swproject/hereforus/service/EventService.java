@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.error.CustomException;
-import com.swproject.hereforus.dto.FestivalDto;
-import com.swproject.hereforus.dto.PerformanceDto;
-import com.swproject.hereforus.entity.Festival;
-import com.swproject.hereforus.entity.Performance;
-import com.swproject.hereforus.repository.FestivalRepository;
-import com.swproject.hereforus.repository.PerformanceRepository;
+import com.swproject.hereforus.dto.event.FestivalDto;
+import com.swproject.hereforus.dto.event.PerformanceDto;
+import com.swproject.hereforus.entity.event.Festival;
+import com.swproject.hereforus.entity.event.Performance;
+import com.swproject.hereforus.repository.event.FestivalRepository;
+import com.swproject.hereforus.repository.event.PerformanceRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 

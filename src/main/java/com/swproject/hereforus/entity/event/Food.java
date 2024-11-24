@@ -1,4 +1,4 @@
-package com.swproject.hereforus.entity;
+package com.swproject.hereforus.entity.event;
 
 import jakarta.persistence.*;
 import lombok.Getter;

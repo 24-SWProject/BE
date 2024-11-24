@@ -1,7 +1,7 @@
 package com.swproject.hereforus.service;
 
-import com.swproject.hereforus.entity.Food;
-import com.swproject.hereforus.repository.FoodRepository;
+import com.swproject.hereforus.entity.event.Food;
+import com.swproject.hereforus.repository.event.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

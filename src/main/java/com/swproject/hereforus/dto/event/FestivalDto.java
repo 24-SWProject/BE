@@ -1,6 +1,5 @@
-package com.swproject.hereforus.dto;
+package com.swproject.hereforus.dto.event;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -10,6 +9,7 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FestivalDto {
+    private Long id;
 
     @JsonProperty("GUNAME")
     private String guName;

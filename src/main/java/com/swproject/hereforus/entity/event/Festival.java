@@ -1,13 +1,10 @@
-package com.swproject.hereforus.entity;
+package com.swproject.hereforus.entity.event;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Table(name="festival")
 @Getter
@@ -52,3 +49,5 @@ public class Festival {
 
     private String gpsY;
 }
+
+

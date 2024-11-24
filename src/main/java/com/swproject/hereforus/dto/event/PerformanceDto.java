@@ -1,4 +1,4 @@
-package com.swproject.hereforus.dto;
+package com.swproject.hereforus.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PerformanceDto {
-    @JsonProperty("mt20id") // 공연 id
-    private String id;
+    private Long id;
 
     @JsonProperty("prfnm") // 공연 이름
     private String title;

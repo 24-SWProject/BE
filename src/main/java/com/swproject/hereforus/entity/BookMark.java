@@ -1,17 +1,16 @@
 package com.swproject.hereforus.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDate;
 
 @Table(name="bookmark")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class BookMark {
+public class Bookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -24,5 +23,13 @@ public class BookMark {
     @Column(nullable = false)
     private String type; // "festival", "performance", "food"
 
-    private String ReferenceId;
+    @Column(nullable = false, name = "reference_id")
+    private Long referenceId;
+
+    @Builder
+    public Bookmark(Group group, String type, Long ReferenceId) {
+        this.group = group;
+        this.type = type;
+        this.referenceId = ReferenceId;
+    }
 }

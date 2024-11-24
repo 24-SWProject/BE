@@ -1,10 +1,8 @@
 package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.dto.ErrorDto;
-import com.swproject.hereforus.dto.FestivalDto;
-import com.swproject.hereforus.dto.JwtDto;
-import com.swproject.hereforus.entity.Festival;
-import com.swproject.hereforus.entity.Performance;
+import com.swproject.hereforus.entity.event.Festival;
+import com.swproject.hereforus.entity.event.Performance;
 import com.swproject.hereforus.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,10 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
 
 @Tag(name = "Event", description = "서울특별시의 행사 관련 REST API에 대한 명세를 제공합니다. 사용자가 요청한 날짜를 기준으로 진행 중인 행사를 조회합니다.")
 @RestController
@@ -77,8 +68,8 @@ public class EventController {
     @GetMapping("/festival")
     public ResponseEntity<?> getFestival(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
-            @RequestParam("page") Integer page,
-            @RequestParam("size") Integer size) {
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
@@ -130,8 +121,8 @@ public class EventController {
     @GetMapping("/performance")
     public ResponseEntity<?> getPerformance(
             @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date,
-            @RequestParam("page") Integer page,
-            @RequestParam("size") Integer size) {
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);

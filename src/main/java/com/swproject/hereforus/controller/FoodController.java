@@ -1,6 +1,6 @@
 package com.swproject.hereforus.controller;
 
-import com.swproject.hereforus.entity.Food;
+import com.swproject.hereforus.entity.event.Food;
 import com.swproject.hereforus.service.FoodService;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;

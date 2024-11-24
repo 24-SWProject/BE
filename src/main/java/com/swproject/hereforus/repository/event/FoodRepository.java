@@ -1,6 +1,6 @@
-package com.swproject.hereforus.repository;
+package com.swproject.hereforus.repository.event;
 
-import com.swproject.hereforus.entity.Food;
+import com.swproject.hereforus.entity.event.Food;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
