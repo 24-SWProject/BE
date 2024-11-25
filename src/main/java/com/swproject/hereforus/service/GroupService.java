@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 
 @Configuration
@@ -91,6 +93,62 @@ public class GroupService {
 
         // 없으면 inviter로 그룹 조회
         return groupRepository.findByInviter(userId);
+    }
+
+    public Map<String, Object> selectGroupAnniversary() {
+        //        User user = userDetailService.getAuthenticatedUserId();
+        //        Optional<Group> group = findGroupForUser(user.getId());
+        Optional<Group> group = findGroupForUser(Long.valueOf("1"));
+        LocalDate anniversary = group.get().getAnniversary();
+        LocalDate today = LocalDate.now();
+
+        // 현재 D-Day 계산
+        long dDay = ChronoUnit.DAYS.between(anniversary, today) + 1;
+
+        // 다가올 주요 주기 계산
+        List<Map<String, Object>> milestoneList = new ArrayList<>();
+        int nextHundreds = ((int) ((dDay - 1) / 100) + 1) * 100;
+        int nextFirstYear = ((int) ((dDay - 1) / 365) + 1) * 365;
+        System.out.println(nextFirstYear);
+        System.out.println(nextHundreds);
+
+        // 100일 단위 추가 (최대 8개)
+        for (int i = 0; i < 9; i++) {
+            int milestoneDay = nextHundreds + (i * 100);
+            LocalDate milestoneDate = anniversary.plusDays(milestoneDay - 1);
+            long daysUntilMilestone = ChronoUnit.DAYS.between(today, milestoneDate);
+
+            Map<String, Object> milestoneDetail = new LinkedHashMap<>();
+            milestoneDetail.put("day", milestoneDay);
+            milestoneDetail.put("date", milestoneDate);
+            milestoneDetail.put("remain", daysUntilMilestone);
+
+            milestoneList.add(milestoneDetail);
+        }
+
+        // 연 단위 추가 (최대 3년)
+        for (int i = 0; i < 3; i++) {
+            int milestoneDay = nextFirstYear + (i * 365);
+            LocalDate milestoneDate = anniversary.plusDays(milestoneDay + 1);
+            long daysUntilMilestone = ChronoUnit.DAYS.between(today, milestoneDate);
+
+            Map<String, Object> milestoneDetail = new LinkedHashMap<>();
+            milestoneDetail.put("day", milestoneDay);
+            milestoneDetail.put("date", milestoneDate);
+            milestoneDetail.put("remain", daysUntilMilestone);
+
+            milestoneList.add(milestoneDetail);
+        }
+
+        // 날짜 기준으로 오름차순 정렬
+        milestoneList.sort(Comparator.comparing(m -> (LocalDate) m.get("date")));
+
+        // 결과 반환
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("currentDay", dDay);
+        result.put("milestones", milestoneList);
+
+        return result;
     }
 }
 

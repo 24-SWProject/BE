@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Bookmark", description = "그룹이 찜한 공연/전시 북마크에 대한 명세입니다.")
 @RestController
-@RequestMapping("/api/bookmark")
+@RequestMapping("/api/auth/bookmark")
 @RequiredArgsConstructor
 public class BookmarkController {
 
@@ -59,14 +59,12 @@ public class BookmarkController {
                     )
             }
     )
-    @GetMapping("/{type}")
+    @GetMapping("/{type}/{id}")
     public ResponseEntity<?> createBookmark(
             @PathVariable("type") String type,
-            @RequestParam("id") Long id
+            @PathVariable("id") Long id
     ) {
         try {
-            System.out.println(type);
-            System.out.println(id);
             Object result = bookmarkService.saveOrDeleteBookmark(type, id);
             return ResponseEntity.ok(result);
         } catch (Exception e) {

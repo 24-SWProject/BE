@@ -171,7 +171,6 @@ public class GroupController {
                             content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
                     )
             }
-
     )
     @PostMapping("/join")
     public ResponseEntity<?> joinGroupByCode(@RequestBody Map<String, String> code) {
@@ -181,6 +180,104 @@ public class GroupController {
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
             return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+
+    /* 기념일 조회 */
+    @Operation(
+            summary = "기념일 조회",
+            description = "현재 디데이와 함께 100일 단위 및 주년 단위의 주요 기념일 정보를 제공합니다. 반환된 데이터는 기념일 날짜와 해당 날짜까지 남은 일수를 포함합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "기념일 조회 성공",
+                            content = @Content(schema = @Schema(example = "{\n" +
+                                    "    \"currentDay\": 476,\n" +
+                                    "    \"milestones\": [\n" +
+                                    "        {\n" +
+                                    "            \"day\": 500,\n" +
+                                    "            \"date\": \"2024-12-19\",\n" +
+                                    "            \"remain\": 24\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 600,\n" +
+                                    "            \"date\": \"2025-03-29\",\n" +
+                                    "            \"remain\": 124\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 700,\n" +
+                                    "            \"date\": \"2025-07-07\",\n" +
+                                    "            \"remain\": 224\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 730,\n" +
+                                    "            \"date\": \"2025-08-08\",\n" +
+                                    "            \"remain\": 256\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 800,\n" +
+                                    "            \"date\": \"2025-10-15\",\n" +
+                                    "            \"remain\": 324\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 900,\n" +
+                                    "            \"date\": \"2026-01-23\",\n" +
+                                    "            \"remain\": 424\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1000,\n" +
+                                    "            \"date\": \"2026-05-03\",\n" +
+                                    "            \"remain\": 524\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1095,\n" +
+                                    "            \"date\": \"2026-08-08\",\n" +
+                                    "            \"remain\": 621\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1100,\n" +
+                                    "            \"date\": \"2026-08-11\",\n" +
+                                    "            \"remain\": 624\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1200,\n" +
+                                    "            \"date\": \"2026-11-19\",\n" +
+                                    "            \"remain\": 724\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1300,\n" +
+                                    "            \"date\": \"2027-02-27\",\n" +
+                                    "            \"remain\": 824\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "            \"day\": 1460,\n" +
+                                    "            \"date\": \"2027-08-08\",\n" +
+                                    "            \"remain\": 986\n" +
+                                    "        }\n" +
+                                    "    ]\n" +
+                                    "}"))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
+                    )
+            }
+    )
+    @GetMapping("/anniv")
+    public ResponseEntity<?> getGroupAnnivarsary() {
+        try {
+            Map<?, ?> result = groupService.selectGroupAnniversary();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");

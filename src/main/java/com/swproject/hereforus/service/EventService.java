@@ -8,12 +8,16 @@ import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.event.FestivalDto;
 import com.swproject.hereforus.dto.event.PerformanceDto;
 import com.swproject.hereforus.entity.event.Festival;
+import com.swproject.hereforus.entity.event.Food;
 import com.swproject.hereforus.entity.event.Performance;
 import com.swproject.hereforus.repository.event.FestivalRepository;
+import com.swproject.hereforus.repository.event.FoodRepository;
 import com.swproject.hereforus.repository.event.PerformanceRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,27 +31,17 @@ import java.util.List;
 import java.util.Optional;
 
 
+@Configuration
+@RequiredArgsConstructor
 @Service
 public class EventService {
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private EnvConfig envConfig;
-
-    @Autowired
-    private FestivalRepository festivalRepository;
-
-    @Autowired
-    private PerformanceRepository performanceRepository;
-
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final ModelMapper modelMapper;
+    private final EnvConfig envConfig;
+    private final FestivalRepository festivalRepository;
+    private final PerformanceRepository performanceRepository;
+    private final FoodRepository foodRepository;
 
     /** 축제 데이터 호출 및 업데이트 */
     @Scheduled(cron = "0 0 0 * * ?")
@@ -164,4 +158,20 @@ public class EventService {
         return null;
     }
 
+    public Object SelectEventById(String type, Long id) {
+        System.out.println(type);
+        System.out.println(id);
+        switch (type) {
+            case "festival":
+                return festivalRepository.findById(id).orElse(null);
+            case "performance":
+                return performanceRepository.findById(id).orElse(null);
+            default:
+                return null;
+        }
+    }
+
+    public Page<Food> getPagedFoodData(Pageable pageable) {
+        return foodRepository.findAll(pageable);
+    }
 }
