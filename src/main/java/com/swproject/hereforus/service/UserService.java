@@ -111,6 +111,4 @@ public class UserService {
         User user = userDetailService.getAuthenticatedUserId();
         userRepository.deleteById(user.getId());
     }
-
-
 }

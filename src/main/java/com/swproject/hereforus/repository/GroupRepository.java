@@ -12,6 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, String> {
-    @Query("SELECT g FROM Group g WHERE g.inviter.id = :userId OR g.invitee.id = :userId")
-    Optional<Group> findByUserId(@Param("userId") Long userId);
+    @Query("SELECT g FROM Group g WHERE g.inviter.id = :userId")
+    Optional<Group> findByInviter(@Param("userId") Long userId);
+
+    @Query("SELECT g FROM Group g WHERE g.invitee.id = :userId")
+    Optional<Group> findByInvitee(@Param("userId") Long userId);
 }
