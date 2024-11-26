@@ -12,6 +12,4 @@ import java.time.LocalDate;
 public class ScheduleDto {
     private String content;
     private LocalDate scheduleDate;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
 }
