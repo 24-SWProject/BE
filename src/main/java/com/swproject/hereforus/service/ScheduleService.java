@@ -29,9 +29,9 @@ public class ScheduleService {
     private final ModelMapper modelMapper;
 
     public Object saveSchedule(ScheduleDto scheduleDto) {
-//        User user = userDetailService.getAuthenticatedUserId();
-//        Optional<Group> group = groupService.findGroupForUser(user.getId());
-        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
         Schedule schedule = Schedule.builder()
                 .group(group.get())
                 .content(scheduleDto.getContent())
@@ -44,9 +44,9 @@ public class ScheduleService {
     }
 
     public Object updateSchedule(ScheduleDto scheduleDto, Long id) {
-//        User user = userDetailService.getAuthenticatedUserId();
-//        Optional<Group> group = groupService.findGroupForUser(user.getId());
-        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         existingSchedule.get().setContent(scheduleDto.getContent());
@@ -57,9 +57,9 @@ public class ScheduleService {
     }
 
     public Object deleteSchedule(Long id) {
-//        User user = userDetailService.getAuthenticatedUserId();
-//        Optional<Group> group = groupService.findGroupForUser(user.getId());
-        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         if (existingSchedule.isPresent() && existingSchedule.get().getGroup().equals(group.get())) {
@@ -70,9 +70,9 @@ public class ScheduleService {
     }
 
     public List<ScheduleDto> selectSchedule() {
-//        User user = userDetailService.getAuthenticatedUserId();
-//        Optional<Group> group = groupService.findGroupForUser(user.getId());
-        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         List<Schedule> existingSchedules = scheduleRepository.findAllByGroup(group.get());
 

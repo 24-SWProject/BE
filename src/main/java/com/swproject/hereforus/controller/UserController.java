@@ -65,9 +65,6 @@ public class UserController {
             // 토큰으로 네이버에서 사용자 프로필 조회
             UserDto profile = userService.fetchNaverProfile(token);
 
-            System.out.println(profile);
-            System.out.println(profile.getEmail());
-
             // 유저 중복 확인
             Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
             if (!existingUser.isPresent()) {
@@ -78,6 +75,8 @@ public class UserController {
             String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
             httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
 
+            httpServletResponse.setHeader("Access-Control-Allow-Headers", "Authorization");
+
             // 리프레시 토큰 생성
             String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
@@ -85,6 +84,22 @@ public class UserController {
 
             httpServletResponse.sendRedirect(envConfig.getClientUrl());
     }
+
+/*
+    @GetMapping("user/token")
+    public ResponseEntity<?> createToken( HttpServletResponse httpServletResponse) {
+        // 액세스 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
+        httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
+
+        httpServletResponse.setHeader("Access-Control-Expose-Headers", "Authorization");
+
+        // 리프레시 토큰 생성
+        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
+        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
+        httpServletResponse.addCookie(refreshCookie);
+    }
+*/
 
     @Operation(
             summary = "로그아웃",

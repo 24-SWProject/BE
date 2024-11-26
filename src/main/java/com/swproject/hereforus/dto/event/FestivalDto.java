@@ -46,4 +46,6 @@ public class FestivalDto {
 
     @JsonProperty("LAT")
     private String gpsX;
+
+    private boolean isBookmarked;
 }

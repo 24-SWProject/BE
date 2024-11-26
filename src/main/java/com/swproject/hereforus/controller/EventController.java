@@ -2,6 +2,7 @@ package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.event.FestivalDto;
+import com.swproject.hereforus.dto.event.PerformanceDto;
 import com.swproject.hereforus.entity.event.Festival;
 import com.swproject.hereforus.entity.event.Food;
 import com.swproject.hereforus.entity.event.Performance;
@@ -73,7 +74,7 @@ public class EventController {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
-            Page<Festival> festivals = eventService.getFestivalsByDate(date, pageable);
+            Page<FestivalDto> festivals = eventService.getFestivalsByDate(date, pageable);
             return ResponseEntity.ok(festivals);
         } catch (Exception e) {
             e.printStackTrace();
@@ -126,7 +127,7 @@ public class EventController {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
-            Page<Performance> performances = eventService.getPerformanceByDate(date, pageable);
+            Page<PerformanceDto> performances = eventService.getPerformanceByDate(date, pageable);
             return ResponseEntity.ok(performances);
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,7 +180,6 @@ public class EventController {
     ) {
         try {
             Object event = eventService.SelectEventById(type, id);
-            System.out.println(event);
             return ResponseEntity.ok(event);
         } catch (Exception e) {
             e.printStackTrace();

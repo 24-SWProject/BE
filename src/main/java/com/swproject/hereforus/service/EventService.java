@@ -7,15 +7,18 @@ import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.event.FestivalDto;
 import com.swproject.hereforus.dto.event.PerformanceDto;
+import com.swproject.hereforus.entity.Bookmark;
+import com.swproject.hereforus.entity.Group;
+import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.entity.event.Festival;
 import com.swproject.hereforus.entity.event.Food;
 import com.swproject.hereforus.entity.event.Performance;
+import com.swproject.hereforus.repository.BookmarkRepository;
 import com.swproject.hereforus.repository.event.FestivalRepository;
 import com.swproject.hereforus.repository.event.FoodRepository;
 import com.swproject.hereforus.repository.event.PerformanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
@@ -42,6 +45,9 @@ public class EventService {
     private final FestivalRepository festivalRepository;
     private final PerformanceRepository performanceRepository;
     private final FoodRepository foodRepository;
+    private final UserDetailService userDetailService;
+    private final GroupService groupService;
+    private final BookmarkRepository bookmarkRepository;
 
     /** 축제 데이터 호출 및 업데이트 */
     @Scheduled(cron = "0 0 0 * * ?")
@@ -142,12 +148,34 @@ public class EventService {
         }
     }
 
-    public Page<Festival> getFestivalsByDate(String date, Pageable pageable) {
-        return festivalRepository.findFestivalsByDate(date, pageable);
+    public Page<FestivalDto> getFestivalsByDate(String date, Pageable pageable) {
+        Page<Festival> festivals = festivalRepository.findFestivalsByDate(date, pageable);
+
+        // isBookmarked 추가
+        Page<FestivalDto> festivalDtos = festivals.map(festival -> {
+            FestivalDto festivalDto = modelMapper.map(festival, FestivalDto.class);
+            boolean isBookmarked = isBookmarked("festival", festival.getId());
+            festivalDto.setBookmarked(isBookmarked);
+
+            return festivalDto;
+        });
+
+        return festivalDtos;
     }
 
-    public Page<Performance> getPerformanceByDate(String date, Pageable pageable) {
-        return performanceRepository.findPerformancesByDate(date, pageable);
+    public Page<PerformanceDto> getPerformanceByDate(String date, Pageable pageable) {
+        Page<Performance> performances = performanceRepository.findPerformancesByDate(date, pageable);
+
+        // isBookmarked 추가
+        Page<PerformanceDto> performanceDtos = performances.map(performance -> {
+            PerformanceDto performanceDto = modelMapper.map(performance, PerformanceDto.class);
+            boolean isBookmarked = isBookmarked("performance", performance.getId());
+            performanceDto.setBookmarked(isBookmarked);
+
+            return performanceDto;
+        });
+
+        return performanceDtos;
     }
 
     // 이벤트 쿼리 파라미터 확인
@@ -159,8 +187,6 @@ public class EventService {
     }
 
     public Object SelectEventById(String type, Long id) {
-        System.out.println(type);
-        System.out.println(id);
         switch (type) {
             case "festival":
                 return festivalRepository.findById(id).orElse(null);
@@ -173,5 +199,19 @@ public class EventService {
 
     public Page<Food> getPagedFoodData(Pageable pageable) {
         return foodRepository.findAll(pageable);
+    }
+
+    // 북마크 여부 판단
+    private boolean isBookmarked(String type, Long referenceId) {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+
+        Optional<Bookmark> bookmark = bookmarkRepository.findByTypeAndReferenceIdAndGroupId(type, referenceId, group.get().getId());
+        if (bookmark.isPresent()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

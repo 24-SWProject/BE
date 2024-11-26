@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Optional<Bookmark> findByTypeAndReferenceId(String type, Long referenceId);
     Page<Bookmark> findByGroupId(String group_id, Pageable pageable);
+    Optional<Bookmark> findByTypeAndReferenceIdAndGroupId(String type, Long referenceId, String groupId);
 }
