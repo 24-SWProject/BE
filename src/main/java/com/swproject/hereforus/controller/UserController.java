@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public class UserController {
     @GetMapping("/user/login")
     public void getCodeStatus(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchNaverUrl();
+        System.out.println(loginUrl);
         response.sendRedirect(loginUrl);
     }
 
@@ -82,7 +84,16 @@ public class UserController {
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
-            httpServletResponse.sendRedirect(envConfig.getClientUrl());
+//            return ResponseEntity.status(HttpStatus.OK).body(accessToken);
+//            httpServletResponse.sendRedirect(envConfig.getClientUrl());
+
+            String redirectUrl = UriComponentsBuilder
+                    .fromUriString(envConfig.getClientUrl()) // 프론트엔드 URL
+                    .queryParam("accessToken", accessToken)  // 쿼리 파라미터 추가
+                    .build()
+                    .toUriString();
+
+            httpServletResponse.sendRedirect(redirectUrl);
     }
 
 /*

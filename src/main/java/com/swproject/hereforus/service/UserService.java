@@ -111,4 +111,9 @@ public class UserService {
         User user = userDetailService.getAuthenticatedUserId();
         userRepository.deleteById(user.getId());
     }
+
+    // 인가코드를 토큰으로 변환
+    // 토큰을 jwt로 변환
+    // 프로필 이미지 생성
+
 }
