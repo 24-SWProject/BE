@@ -6,8 +6,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 
 
@@ -33,10 +31,11 @@ public class Group {
 
     private String nickName;
 
-    @DateTimeFormat(pattern = "yyyy-mm-dd")
     private LocalDate anniversary;
 
-    private String profileImg;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] profileImg;
 
     @CreationTimestamp
     @Column(name= "createdAt", nullable = false, updatable = false)
@@ -50,7 +49,7 @@ public class Group {
     private LocalDate deletedAt = null;
 
     @Builder
-    public Group(String id, User inviter, String nickName, LocalDate anniversary, String profileImg) {
+    public Group(String id, User inviter, String nickName, LocalDate anniversary, byte[] profileImg) {
         this.id = id;
         this.inviter = inviter;
         this.nickName = nickName;

@@ -13,13 +13,12 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GroupDto {
+public class GroupOutputDto {
     private String nickName;
 
     @DateTimeFormat(pattern = "yyyy-mm-dd")
     private LocalDate anniversary;
 
-    // 클라이언트로부터 받을 때 사용
-    private MultipartFile profileImg;
-
+    // 클라이언트로에게 반환할 때 사용
+    private String profileImg;
 }

@@ -91,7 +91,7 @@ public class UserService {
 
     // User 생성
     @Transactional
-    public UserDto createUser(UserDto userInfo) {
+    public UserDto createUser(UserDto userInfo) throws IOException {
 
         User user = User.builder()
                 .email(userInfo.getEmail())

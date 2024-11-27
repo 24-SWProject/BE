@@ -3,6 +3,7 @@ package com.swproject.hereforus.service;
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.GroupCodeDto;
 import com.swproject.hereforus.dto.GroupDto;
+import com.swproject.hereforus.dto.GroupOutputDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.GroupRepository;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -35,16 +37,29 @@ public class GroupService {
     }
 
     // 속해있는 그룹 프로필 조회
-    public Optional<GroupDto> fetchGroupProfile() {
+    public GroupOutputDto fetchGroupProfile() {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = findGroupForUser(user.getId());
 //        Optional<Group> group = findGroupForUser(Long.valueOf("1"));
-        return group.map(g -> modelMapper.map(g, GroupDto.class));
+
+        if (group.isPresent()) {
+            Group groupEntity = group.get();
+            GroupOutputDto dto = modelMapper.map(groupEntity, GroupOutputDto.class);
+
+            // Base64로 변환된 이미지 설정
+            if (groupEntity.getProfileImg() != null) {
+                String base64ProfileImg = Base64.getEncoder().encodeToString(groupEntity.getProfileImg());
+                dto.setProfileImg(base64ProfileImg);
+            }
+
+            return dto;
+        }
+        return null;
     }
 
     // 그룹 프로필 수정
     // inviter 찾아서 그 group에 저장
-    public GroupDto saveGroupProfile(GroupDto groupDto) {
+    public GroupOutputDto saveGroupProfile(GroupDto groupDto) throws IOException {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupRepository.findByInviter(user.getId());
 //        Optional<Group> group = groupRepository.findByInviter(Long.valueOf("1"));
@@ -52,11 +67,16 @@ public class GroupService {
 
         existingGroup.setNickName(groupDto.getNickName());
         existingGroup.setAnniversary(groupDto.getAnniversary());
-        existingGroup.setProfileImg(groupDto.getProfileImg());
+        existingGroup.setProfileImg(groupDto.getProfileImg() != null ? groupDto.getProfileImg().getBytes() : null);
 
         Group updatedProfile = groupRepository.save(existingGroup);
+        GroupOutputDto dto = modelMapper.map(updatedProfile, GroupOutputDto.class);
 
-        return modelMapper.map(updatedProfile, GroupDto.class);
+        if (updatedProfile.getProfileImg() != null) {
+            String base64ProfileImg = Base64.getEncoder().encodeToString(updatedProfile.getProfileImg());
+            dto.setProfileImg(base64ProfileImg);
+        }
+        return dto;
     }
 
     // 받은 초대코드로 그룹id 조회 및 참여

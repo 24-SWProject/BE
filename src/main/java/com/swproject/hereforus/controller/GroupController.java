@@ -4,6 +4,8 @@ import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.GroupCodeDto;
 import com.swproject.hereforus.dto.GroupDto;
+import com.swproject.hereforus.dto.GroupOutputDto;
+import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.service.GroupService;
 import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,24 +30,16 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
-    private final UserService userService;
-
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
-        String code = groupService.generateCode();
-        return ResponseEntity.ok(code);
-    }
-
 
     /* 그룹 코드 조회 */
     @Operation(
             summary = "그룹 코드 조회",
-            description = "그룹 생성 시 발급된 고유 그룹 코드를 조회합니다. 이 코드는 다른 사용자를 그룹에 초대하거나 초대를 받을 때 사용됩니다.",
+            description = "그룹 생성 시 발급된 고유 그룹 코드 8글자를 조회합니다. 이 코드는 다른 사용자를 그룹에 초대하거나 초대를 받을 때 사용됩니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
                             description = "그룹 코드 조회 성공",
-                            content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                            content = @Content(schema = @Schema(implementation = GroupCodeDto.class, description = "8글자 길이의 그룹 코드. 소문자, 특수문자, 숫자가 포함됩니다."))),
                     @ApiResponse(
                             responseCode = "403",
                             description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
@@ -76,12 +71,18 @@ public class GroupController {
     /* 그룹 프로필 조회 */
     @Operation(
             summary = "그룹 프로필 조회",
-            description = "현재 그룹의 프로필 정보를 확인합니다. 그룹 닉네임, 기념일, 대표 이미지와 같은 세부 정보를 포함합니다",
+            description = """
+            현재 그룹의 프로필 정보를 확인합니다. 그룹 닉네임, 기념일, 대표 이미지와 같은 세부 정보를 포함합니다.
+            프로필 이미지는 데이터베이스에 Blob 형태로 저장되며, 클라이언트에 반환될 때는 Base64 인코딩된 문자열로 반환됩니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "그룹 프로필 조회 성공",
-                            content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                            description = """
+                            그룹 프로필 조회 성공.
+                            반환되는 프로필 이미지(`profileImg`) 필드는 Base64로 인코딩된 문자열입니다.
+                            """,
+                            content = @Content(schema = @Schema(implementation = GroupOutputDto.class))),
                     @ApiResponse(
                             responseCode = "403",
                             description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
@@ -96,7 +97,7 @@ public class GroupController {
     @GetMapping
     public ResponseEntity<?> getGroupProfile() {
         try {
-            Optional<GroupDto> profile = groupService.fetchGroupProfile();
+            GroupOutputDto profile = groupService.fetchGroupProfile();
             return ResponseEntity.ok(profile);
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
@@ -117,7 +118,7 @@ public class GroupController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "그룹 프로필 수정 성공",
-                            content = @Content(schema = @Schema(implementation = GroupDto.class))),
+                            content = @Content(mediaType = "multipart/form-data", schema = @Schema(implementation = GroupOutputDto.class))),
                     @ApiResponse(
                             responseCode = "403",
                             description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
@@ -130,9 +131,9 @@ public class GroupController {
             }
     )
     @PutMapping
-    public ResponseEntity<?> updateGroupProfile(@RequestBody GroupDto groupDto) {
+    public ResponseEntity<?> updateGroupProfile(@ModelAttribute GroupDto groupDto) {
         try {
-            GroupDto updatedProfile = groupService.saveGroupProfile(groupDto);
+            GroupOutputDto updatedProfile = groupService.saveGroupProfile(groupDto);
             return ResponseEntity.ok(updatedProfile);
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
