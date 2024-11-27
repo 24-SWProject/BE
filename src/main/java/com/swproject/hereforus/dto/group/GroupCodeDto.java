@@ -1,11 +1,8 @@
-package com.swproject.hereforus.dto;
+package com.swproject.hereforus.dto.group;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter

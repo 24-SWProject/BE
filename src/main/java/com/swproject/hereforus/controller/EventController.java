@@ -1,5 +1,6 @@
 package com.swproject.hereforus.controller;
 
+import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.event.FestivalDto;
 import com.swproject.hereforus.dto.event.PerformanceDto;
@@ -46,6 +47,10 @@ public class EventController {
                             description = "매개변수 누락 및 형식 불일치"
                     ),
                     @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
                             responseCode = "500",
                             description = "서버 에러 발생",
                             content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
@@ -79,6 +84,9 @@ public class EventController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Festival> festivals = eventService.getFestivalsByDate(date, pageable);
             return ResponseEntity.ok(festivals);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
@@ -98,9 +106,13 @@ public class EventController {
                             description = "공연 데이터 조회 성공.",
                             content = @Content(schema = @Schema(implementation = Page.class))),
                     @ApiResponse(
-                            responseCode = "403",
+                            responseCode = "400",
                             description = "매개변수 누락 및 형식 불일치"
                     ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
                     @ApiResponse(
                             responseCode = "500",
                             description = "서버 에러 발생",
@@ -135,6 +147,9 @@ public class EventController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Performance> performances = eventService.getPerformanceByDate(date, pageable);
             return ResponseEntity.ok(performances);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
@@ -155,9 +170,12 @@ public class EventController {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "매개변수 누락 및 형식 불일치",
-                            content = @Content(schema = @Schema(example = "{ \"error\": \"Invalid parameters.\" }"))
+                            description = "매개변수 누락 및 형식 불일치"
                     ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
                     @ApiResponse(
                             responseCode = "500",
                             description = "서버 에러 발생",
@@ -187,6 +205,9 @@ public class EventController {
         try {
             Object event = eventService.SelectEventById(type, id);
             return ResponseEntity.ok(event);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");

@@ -1,9 +1,9 @@
 package com.swproject.hereforus.service;
 
 import com.swproject.hereforus.config.error.CustomException;
-import com.swproject.hereforus.dto.GroupCodeDto;
-import com.swproject.hereforus.dto.GroupDto;
-import com.swproject.hereforus.dto.GroupOutputDto;
+import com.swproject.hereforus.dto.group.GroupCodeDto;
+import com.swproject.hereforus.dto.group.GroupDto;
+import com.swproject.hereforus.dto.group.GroupOutputDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.GroupRepository;
@@ -32,7 +32,6 @@ public class GroupService {
     public Optional<GroupCodeDto> fetchGroupCode() {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupRepository.findByInviter(user.getId());
-//        Optional<Group> group = groupRepository.findByInviter(Long.valueOf("1"));
         return group.map(g -> modelMapper.map(g, GroupCodeDto.class));
     }
 
@@ -40,7 +39,6 @@ public class GroupService {
     public GroupOutputDto fetchGroupProfile() {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = findGroupForUser(user.getId());
-//        Optional<Group> group = findGroupForUser(Long.valueOf("1"));
 
         if (group.isPresent()) {
             Group groupEntity = group.get();
@@ -62,7 +60,6 @@ public class GroupService {
     public GroupOutputDto saveGroupProfile(GroupDto groupDto) throws IOException {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupRepository.findByInviter(user.getId());
-//        Optional<Group> group = groupRepository.findByInviter(Long.valueOf("1"));
         Group existingGroup = group.get();
 
         existingGroup.setNickName(groupDto.getNickName());
@@ -94,10 +91,12 @@ public class GroupService {
         return modelMapper.map(updatedInvitee, GroupDto.class);
     }
 
-    // 그룹 참여 최대 2명 제한 확인
+    // 그룹 참여 확인
     public String checkNumberOfGroup(Group group, User user) {
         if (group.getInvitee() != null && group.getInvitee().getId().equals(user.getId())) {
             throw new CustomException(HttpStatus.CONFLICT, "이미 그룹에 참여하였거나, 그룹 인원이 초과되었습니다.");
+        } else if (group.getInviter().getGroup().equals(user.getId())) {
+            throw new CustomException(HttpStatus.CONFLICT, "그룹의 초대자는 참여할 수 없습니다.");
         }
         return null;
     }
@@ -117,10 +116,14 @@ public class GroupService {
     }
 
     public Map<String, Object> selectGroupAnniversary() {
-        //        User user = userDetailService.getAuthenticatedUserId();
-        //        Optional<Group> group = findGroupForUser(user.getId());
-        Optional<Group> group = findGroupForUser(Long.valueOf("1"));
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = findGroupForUser(user.getId());
         LocalDate anniversary = group.get().getAnniversary();
+
+        if (anniversary == null) {
+            return Collections.emptyMap();
+        }
+
         LocalDate today = LocalDate.now();
 
         // 현재 D-Day 계산

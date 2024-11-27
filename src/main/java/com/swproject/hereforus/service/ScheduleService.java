@@ -1,8 +1,6 @@
 package com.swproject.hereforus.service;
 
-import com.swproject.hereforus.dto.GroupDto;
 import com.swproject.hereforus.dto.ScheduleDto;
-import com.swproject.hereforus.entity.Bookmark;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.Schedule;
 import com.swproject.hereforus.entity.User;
@@ -13,7 +11,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,7 +28,7 @@ public class ScheduleService {
     public Object saveSchedule(ScheduleDto scheduleDto) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
-//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
+
         Schedule schedule = Schedule.builder()
                 .group(group.get())
                 .content(scheduleDto.getContent())
@@ -46,7 +43,6 @@ public class ScheduleService {
     public Object updateSchedule(ScheduleDto scheduleDto, Long id) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
-//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         existingSchedule.get().setContent(scheduleDto.getContent());
@@ -59,7 +55,6 @@ public class ScheduleService {
     public Object deleteSchedule(Long id) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
-//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         if (existingSchedule.isPresent() && existingSchedule.get().getGroup().equals(group.get())) {
@@ -72,7 +67,6 @@ public class ScheduleService {
     public List<ScheduleDto> selectSchedule() {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
-//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         List<Schedule> existingSchedules = scheduleRepository.findAllByGroup(group.get());
 

@@ -33,7 +33,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final UserDetailService userDetailService;
-    private final EntityManager entityManager;
     private final GroupService groupService;
 
     public String fetchNaverUrl() {

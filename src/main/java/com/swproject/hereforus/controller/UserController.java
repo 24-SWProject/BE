@@ -1,6 +1,7 @@
 package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.config.EnvConfig;
+import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.UserDto;
@@ -55,7 +56,6 @@ public class UserController {
     @GetMapping("/user/login")
     public void getCodeStatus(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchNaverUrl();
-        System.out.println(loginUrl);
         response.sendRedirect(loginUrl);
     }
 
@@ -96,22 +96,6 @@ public class UserController {
             httpServletResponse.sendRedirect(redirectUrl);
     }
 
-/*
-    @GetMapping("user/token")
-    public ResponseEntity<?> createToken( HttpServletResponse httpServletResponse) {
-        // 액세스 토큰 생성
-        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
-        httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
-
-        httpServletResponse.setHeader("Access-Control-Expose-Headers", "Authorization");
-
-        // 리프레시 토큰 생성
-        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
-        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
-        httpServletResponse.addCookie(refreshCookie);
-    }
-*/
-
     @Operation(
             summary = "로그아웃",
             description = "JWT 방식으로 인증된 사용자의 로그아웃을 처리합니다. 클라이언트가 보유한 액세스 및 리프레시 토큰을 삭제하여 로그아웃을 완료합니다.",
@@ -137,6 +121,9 @@ public class UserController {
         try {
             SecurityContextHolder.clearContext();
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
@@ -169,6 +156,9 @@ public class UserController {
         try {
             userService.withdrawUser();
             return ResponseEntity.ok("회원 탈퇴가 성공적으로 처리되었습니다.");
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");

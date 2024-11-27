@@ -201,7 +201,6 @@ public class EventService {
     private boolean isBookmarked(String type, Long referenceId) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
-//        Optional<Group> group = groupService.findGroupForUser(Long.valueOf("1"));
 
         Optional<Bookmark> bookmark = bookmarkRepository.findByTypeAndReferenceIdAndGroupId(type, referenceId, group.get().getId());
         if (bookmark.isPresent()) {

@@ -2,14 +2,13 @@ package com.swproject.hereforus.controller;
 
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
-import com.swproject.hereforus.dto.GroupCodeDto;
-import com.swproject.hereforus.dto.GroupDto;
-import com.swproject.hereforus.dto.GroupOutputDto;
-import com.swproject.hereforus.entity.Group;
+import com.swproject.hereforus.dto.group.GroupCodeDto;
+import com.swproject.hereforus.dto.group.GroupDto;
+import com.swproject.hereforus.dto.group.GroupOutputDto;
 import com.swproject.hereforus.service.GroupService;
-import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -171,9 +169,11 @@ public class GroupController {
                             content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
                     @ApiResponse(
                             responseCode = "409",
-                            description = "그룹 중복 참여 시도 또는 최대 인원 초과",
-                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 409, \"message\": \"이미 그룹에 참여하였거나, 그룹 인원이 초과되었습니다.\" }"))
-                    ),
+                            description = "그룹 참여 실패",
+                            content = @Content(examples = {
+                                    @ExampleObject(name = "그룹에 중복 참여하거나 최대 인원을 초과한 경우", value = "이미 그룹에 참여하였거나, 그룹 인원이 초과되었습니다."),
+                                    @ExampleObject(name = "그룹의 초대자가 그룹에 참여한 경우", value = "그룹의 초대자는 참여할 수 없습니다.")}
+                            )),
                     @ApiResponse(
                             responseCode = "500",
                             description = "서버 에러 발생",
@@ -205,71 +205,79 @@ public class GroupController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "기념일 조회 성공",
-                            content = @Content(schema = @Schema(example = "{\n" +
-                                    "    \"currentDay\": 476,\n" +
-                                    "    \"milestones\": [\n" +
-                                    "        {\n" +
-                                    "            \"day\": 500,\n" +
-                                    "            \"date\": \"2024-12-19\",\n" +
-                                    "            \"remain\": 24\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 600,\n" +
-                                    "            \"date\": \"2025-03-29\",\n" +
-                                    "            \"remain\": 124\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 700,\n" +
-                                    "            \"date\": \"2025-07-07\",\n" +
-                                    "            \"remain\": 224\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 730,\n" +
-                                    "            \"date\": \"2025-08-08\",\n" +
-                                    "            \"remain\": 256\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 800,\n" +
-                                    "            \"date\": \"2025-10-15\",\n" +
-                                    "            \"remain\": 324\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 900,\n" +
-                                    "            \"date\": \"2026-01-23\",\n" +
-                                    "            \"remain\": 424\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1000,\n" +
-                                    "            \"date\": \"2026-05-03\",\n" +
-                                    "            \"remain\": 524\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1095,\n" +
-                                    "            \"date\": \"2026-08-08\",\n" +
-                                    "            \"remain\": 621\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1100,\n" +
-                                    "            \"date\": \"2026-08-11\",\n" +
-                                    "            \"remain\": 624\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1200,\n" +
-                                    "            \"date\": \"2026-11-19\",\n" +
-                                    "            \"remain\": 724\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1300,\n" +
-                                    "            \"date\": \"2027-02-27\",\n" +
-                                    "            \"remain\": 824\n" +
-                                    "        },\n" +
-                                    "        {\n" +
-                                    "            \"day\": 1460,\n" +
-                                    "            \"date\": \"2027-08-08\",\n" +
-                                    "            \"remain\": 986\n" +
-                                    "        }\n" +
-                                    "    ]\n" +
-                                    "}"))
+                            content = @Content(examples = {
+                                    @ExampleObject(name = "기념일 등록되어 있는 경우", value = """
+                                            {
+                                                "currentDay": 330,
+                                                "milestones": [
+                                                    {
+                                                        "day": 365,
+                                                        "date": "2025-01-03",
+                                                        "remain": 37
+                                                    },
+                                                    {
+                                                        "day": 400,
+                                                        "date": "2025-02-05",
+                                                        "remain": 70
+                                                    },
+                                                    {
+                                                        "day": 500,
+                                                        "date": "2025-05-16",
+                                                        "remain": 170
+                                                    },
+                                                    {
+                                                        "day": 600,
+                                                        "date": "2025-08-24",
+                                                        "remain": 270
+                                                    },
+                                                    {
+                                                        "day": 700,
+                                                        "date": "2025-12-02",
+                                                        "remain": 370
+                                                    },
+                                                    {
+                                                        "day": 730,
+                                                        "date": "2026-01-03",
+                                                        "remain": 402
+                                                    },
+                                                    {
+                                                        "day": 800,
+                                                        "date": "2026-03-12",
+                                                        "remain": 470
+                                                    },
+                                                    {
+                                                        "day": 900,
+                                                        "date": "2026-06-20",
+                                                        "remain": 570
+                                                    },
+                                                    {
+                                                        "day": 1000,
+                                                        "date": "2026-09-28",
+                                                        "remain": 670
+                                                    },
+                                                    {
+                                                        "day": 1095,
+                                                        "date": "2027-01-03",
+                                                        "remain": 767
+                                                    },
+                                                    {
+                                                        "day": 1100,
+                                                        "date": "2027-01-06",
+                                                        "remain": 770
+                                                    },
+                                                    {
+                                                        "day": 1200,
+                                                        "date": "2027-04-16",
+                                                        "remain": 870
+                                                    }
+                                                ]
+                                            }
+                                            """
+                                    ),
+                                    @ExampleObject(name="기념일 등록되어 있지 않은 경우", value= """
+                                            {}
+                                            """)
+                            })
                     ),
                     @ApiResponse(
                             responseCode = "403",
@@ -287,6 +295,9 @@ public class GroupController {
         try {
             Map<?, ?> result = groupService.selectGroupAnniversary();
             return ResponseEntity.ok(result);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
         } catch (Exception e) {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
