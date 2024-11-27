@@ -3,6 +3,8 @@ package com.swproject.hereforus.service;
 import com.swproject.hereforus.entity.Bookmark;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.entity.event.Festival;
+import com.swproject.hereforus.entity.event.Performance;
 import com.swproject.hereforus.repository.BookmarkRepository;
 import com.swproject.hereforus.repository.GroupRepository;
 import com.swproject.hereforus.repository.event.FestivalRepository;
@@ -64,11 +66,15 @@ public class BookmarkService {
 
             switch (type) {
                 case "festival":
-                    return festivalRepository.findById(referenceId).orElse(null);
+                    Optional<Festival> festival = festivalRepository.findById(referenceId);
+                    festival.get().setType("festival");
+
+                    return festival;
                 case "performance":
-                    return performanceRepository.findById(referenceId).orElse(null);
-                case "food":
-                    return foodRepository.findById(referenceId).orElse(null);
+                    Optional<Performance> performance = performanceRepository.findById(referenceId);
+                    performance.get().setType("performance");
+
+                    return performance;
                 default:
                     return null;
             }

@@ -44,6 +44,7 @@ public class WebSecurityConfig {
             "/api/event/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
+            "api/auth/recommend"
     };
 
     // 특정 http 요청에 대한 웹 기반 보안 구성

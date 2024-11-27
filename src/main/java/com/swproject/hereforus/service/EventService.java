@@ -148,34 +148,30 @@ public class EventService {
         }
     }
 
-    public Page<FestivalDto> getFestivalsByDate(String date, Pageable pageable) {
+    public Page<Festival> getFestivalsByDate(String date, Pageable pageable) {
         Page<Festival> festivals = festivalRepository.findFestivalsByDate(date, pageable);
 
-        // isBookmarked 추가
-        Page<FestivalDto> festivalDtos = festivals.map(festival -> {
-            FestivalDto festivalDto = modelMapper.map(festival, FestivalDto.class);
+        // isBookmarked 값을 엔티티에 설정
+        festivals.forEach(festival -> {
             boolean isBookmarked = isBookmarked("festival", festival.getId());
-            festivalDto.setBookmarked(isBookmarked);
-
-            return festivalDto;
+            festival.setBookmarked(isBookmarked);
+            festival.setType("festival");
         });
 
-        return festivalDtos;
+        return festivals;
     }
 
-    public Page<PerformanceDto> getPerformanceByDate(String date, Pageable pageable) {
+    public Page<Performance> getPerformanceByDate(String date, Pageable pageable) {
         Page<Performance> performances = performanceRepository.findPerformancesByDate(date, pageable);
 
-        // isBookmarked 추가
-        Page<PerformanceDto> performanceDtos = performances.map(performance -> {
-            PerformanceDto performanceDto = modelMapper.map(performance, PerformanceDto.class);
+        // isBookmarked 값을 엔티티에 설정
+        performances.forEach(performance -> {
             boolean isBookmarked = isBookmarked("performance", performance.getId());
-            performanceDto.setBookmarked(isBookmarked);
-
-            return performanceDto;
+            performance.setBookmarked(isBookmarked);
+            performance.setType("performance");
         });
 
-        return performanceDtos;
+        return performances;
     }
 
     // 이벤트 쿼리 파라미터 확인

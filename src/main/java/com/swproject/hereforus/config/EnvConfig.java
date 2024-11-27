@@ -46,4 +46,7 @@ public class EnvConfig {
 
     @Value("${CLIENT_URL}")
     private String ClientUrl;
+
+    @Value("${AI_URL}")
+    private String AIUrl;
 }

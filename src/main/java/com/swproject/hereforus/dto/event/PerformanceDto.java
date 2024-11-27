@@ -31,7 +31,5 @@ public class PerformanceDto {
 
     @JsonProperty("genrenm") // 공연 장르
     private String category;
-
-    private boolean isBookmarked;
 }
 

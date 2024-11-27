@@ -77,7 +77,7 @@ public class BookmarkController {
     @Operation(
             summary = "북마크 조회",
             description = " 현재 그룹 사용자가 찜한 북마크 데이터를 조회하는 API입니다.\n" +
-                          " 반환 데이터는 사용자가 저장한 공연, 축제, 음식점 정보의 세부 데이터로 구성됩니다.",
+                          " 반환 데이터는 사용자가 저장한 공연, 축제, 음식점 정보의 세부 데이터와 타입 형태(예: festival, performance)로 구성됩니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",

@@ -25,14 +25,17 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Event", description = "서울특별시의 행사 관련 REST API에 대한 명세를 제공합니다. 사용자가 요청한 날짜를 기준으로 진행 중인 행사를 조회합니다.")
 @RestController
-@RequestMapping("/api/event")
+@RequestMapping("/api/auth/event")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
 
     @Operation(
             summary = "축제 조회",
-            description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보를 조회합니다. 데이터는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.",
+            description = """
+            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.
+            축제 정보는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -74,7 +77,7 @@ public class EventController {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
-            Page<FestivalDto> festivals = eventService.getFestivalsByDate(date, pageable);
+            Page<Festival> festivals = eventService.getFestivalsByDate(date, pageable);
             return ResponseEntity.ok(festivals);
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +88,10 @@ public class EventController {
 
     @Operation(
             summary = "공연 조회",
-            description = "사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보를 조회합니다. 공연의 제목, 장소, 시작일, 종료일, 카테고리(예: 뮤지컬, 연극) 및 포스터 정보와 북마크 를 포함합니다.",
+            description = """
+            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.
+            축제 정보는 공연예술통합전산망에서 제공되며, 공연의 제목, 장소, 시작일, 종료일, 포스터 정보 등을 포함합니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -127,7 +133,7 @@ public class EventController {
         try {
             eventService.checkEventParameter(date, page, size);
             Pageable pageable = PageRequest.of(page, size);
-            Page<PerformanceDto> performances = eventService.getPerformanceByDate(date, pageable);
+            Page<Performance> performances = eventService.getPerformanceByDate(date, pageable);
             return ResponseEntity.ok(performances);
         } catch (Exception e) {
             e.printStackTrace();

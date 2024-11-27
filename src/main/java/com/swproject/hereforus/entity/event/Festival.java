@@ -48,6 +48,12 @@ public class Festival {
     private String gpsX;
 
     private String gpsY;
+
+    @Transient
+    private boolean bookmarked;
+
+    @Transient
+    private String type;
 }
 
 

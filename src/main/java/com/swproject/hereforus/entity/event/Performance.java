@@ -31,4 +31,10 @@ public class Performance {
     private String poster;
 
     private String category;
+
+    @Transient
+    private boolean bookmarked;
+
+    @Transient
+    private String type;
 }
