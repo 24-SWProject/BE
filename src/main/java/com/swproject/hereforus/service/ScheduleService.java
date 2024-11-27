@@ -1,6 +1,7 @@
 package com.swproject.hereforus.service;
 
 import com.swproject.hereforus.dto.ScheduleDto;
+import com.swproject.hereforus.dto.group.GroupDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.Schedule;
 import com.swproject.hereforus.entity.User;
@@ -25,7 +26,7 @@ public class ScheduleService {
     private final GroupRepository groupRepository;
     private final ModelMapper modelMapper;
 
-    public Object saveSchedule(ScheduleDto scheduleDto) {
+    public ScheduleDto saveSchedule(ScheduleDto scheduleDto) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
 
@@ -36,20 +37,15 @@ public class ScheduleService {
                 .build();
 
         Schedule savedSchedule = scheduleRepository.save(schedule);
-
-        return savedSchedule;
+        return modelMapper.map(savedSchedule, ScheduleDto.class);
     }
 
-    public Object updateSchedule(ScheduleDto scheduleDto, Long id) {
-        User user = userDetailService.getAuthenticatedUserId();
-        Optional<Group> group = groupService.findGroupForUser(user.getId());
-
+    public ScheduleDto updateSchedule(ScheduleDto scheduleDto, Long id) {
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         existingSchedule.get().setContent(scheduleDto.getContent());
 
         Schedule updatedSchedule = scheduleRepository.save(existingSchedule.get());
-
-        return updatedSchedule;
+        return modelMapper.map(updatedSchedule, ScheduleDto.class);
     }
 
     public Object deleteSchedule(Long id) {

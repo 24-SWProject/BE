@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScheduleDto {
+    private Long id;
     private String content;
     private LocalDate scheduleDate;
 }
