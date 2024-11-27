@@ -5,6 +5,7 @@ import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.GroupCodeDto;
 import com.swproject.hereforus.dto.GroupDto;
 import com.swproject.hereforus.service.GroupService;
+import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,6 +27,13 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserService userService;
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        String code = groupService.generateCode();
+        return ResponseEntity.ok(code);
+    }
 
 
     /* 그룹 코드 조회 */

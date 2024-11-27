@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,9 +19,7 @@ import java.time.LocalDate;
 @Entity
 public class Group {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
     @OneToOne
@@ -53,7 +50,8 @@ public class Group {
     private LocalDate deletedAt = null;
 
     @Builder
-    public Group(User inviter, String nickName, LocalDate anniversary, String profileImg) {
+    public Group(String id, User inviter, String nickName, LocalDate anniversary, String profileImg) {
+        this.id = id;
         this.inviter = inviter;
         this.nickName = nickName;
         this.anniversary = anniversary;

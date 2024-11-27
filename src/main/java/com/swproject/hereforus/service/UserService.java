@@ -7,6 +7,7 @@ import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 @Configuration
 @PropertySource("classpath:env.properties")
@@ -31,7 +33,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final UserDetailService userDetailService;
-
+    private final EntityManager entityManager;
+    private final GroupService groupService;
 
     public String fetchNaverUrl() {
         String baseUrl = "https://nid.naver.com/oauth2.0/authorize";
@@ -89,6 +92,7 @@ public class UserService {
     // User 생성
     @Transactional
     public UserDto createUser(UserDto userInfo) {
+
         User user = User.builder()
                 .email(userInfo.getEmail())
                 .nickname(userInfo.getNickname())
@@ -97,9 +101,12 @@ public class UserService {
 
         // Group 생성
         Group group = Group.builder()
+                .id(groupService.generateCode())
                 .inviter(user)
                 .build();
         user.setGroup(group);
+
+
 
         User savedUser = userRepository.save(user);
 
@@ -111,9 +118,5 @@ public class UserService {
         User user = userDetailService.getAuthenticatedUserId();
         userRepository.deleteById(user.getId());
     }
-
-    // 인가코드를 토큰으로 변환
-    // 토큰을 jwt로 변환
-    // 프로필 이미지 생성
 
 }

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -109,8 +110,6 @@ public class GroupService {
         List<Map<String, Object>> milestoneList = new ArrayList<>();
         int nextHundreds = ((int) ((dDay - 1) / 100) + 1) * 100;
         int nextFirstYear = ((int) ((dDay - 1) / 365) + 1) * 365;
-        System.out.println(nextFirstYear);
-        System.out.println(nextHundreds);
 
         // 100일 단위 추가 (최대 8개)
         for (int i = 0; i < 9; i++) {
@@ -149,6 +148,18 @@ public class GroupService {
         result.put("milestones", milestoneList);
 
         return result;
+    }
+
+    // 그룹 코드 생성
+    public String generateCode() {
+        String characters = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~";
+        Integer codeLength = 8;
+        SecureRandom random = new SecureRandom();
+        StringBuilder code = new StringBuilder(codeLength);
+        for (int i = 0; i < codeLength; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return code.toString();
     }
 }
 
