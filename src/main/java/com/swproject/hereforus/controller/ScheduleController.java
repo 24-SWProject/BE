@@ -106,7 +106,7 @@ public class ScheduleController {
     @Operation(
             summary = "일정 삭제",
             description = """
-                    그룹의 특정 일정을 삭제하는 API입니다.
+                    그룹의 특정 일정을 삭제하는 API입니다.\n
                     삭제된 일정의 상태를 반환하며, 성공 시 메시지를 제공합니다.
                     """,
             responses = {
@@ -143,9 +143,12 @@ public class ScheduleController {
     }
 
     @Operation(
-            summary = "일정 조회 (월별 조회로 수정 예정)ㅍ",
+            summary = "일정 조회",
             description = """
-                    그룹에 저장된 모든 일정을 조회하는 API입니다.
+                    그룹에 저장된 모든 일정을 조회하는 API입니다.\n
+                    선택적으로 `date` 파라미터를 사용하여 특정 월의 일정만 조회할 수 있습니다.\n
+                    - `date` 형식은 `YYYY-MM`이어야 하며, 해당 월의 모든 일정이 반환됩니다.\n
+                    - `date` 파라미터를 제공하지 않으면 그룹의 모든 일정이 반환됩니다.\n
                     반환 데이터는 일정 목록과 세부 정보를 포함합니다.
                     """,
             responses = {
@@ -153,20 +156,23 @@ public class ScheduleController {
                             responseCode = "200",
                             description = "일정 조회 성공",
                             content = @Content(schema = @Schema(example = """
-                                [
-                                    {
-                                        "content": "휴가",
-                                        "scheduleDate": "2024-11-05",
-                                        "createdAt": "2024-11-25",
-                                        "updatedAt": "2024-11-25"
-                                    },
-                                    {
-                                        "content": "회의",
-                                        "scheduleDate": "2024-11-06",
-                                        "createdAt": "2024-11-25",
-                                        "updatedAt": "2024-11-25"
-                                    }
-                                ]
+                                        [
+                                            {
+                                                "id": 2,
+                                                "content": "테스트",
+                                                "scheduleDate": "2024-11-26"
+                                            },
+                                            {
+                                                "id": 3,
+                                                "content": "테스트2",
+                                                "scheduleDate": "2024-11-25"
+                                            },
+                                            {
+                                                "id": 4,
+                                                "content": "테스트테스트",
+                                                "scheduleDate": "2024-11-25"
+                                            }
+                                        ]
                                 """))
                     ),
                     @ApiResponse(
@@ -181,9 +187,9 @@ public class ScheduleController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getSchedule() {
+    public ResponseEntity<?> getSchedule(@RequestParam(name = "date", required = false) String date) {
         try {
-            List<ScheduleDto> result = scheduleService.selectSchedule();
+            List<ScheduleDto> result = scheduleService.selectSchedule(date);
             return ResponseEntity.ok(result);
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());

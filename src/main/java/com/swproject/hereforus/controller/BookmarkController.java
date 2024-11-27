@@ -29,8 +29,10 @@ public class BookmarkController {
 
     @Operation(
             summary = "북마크 생성 및 삭제",
-            description = " 사용자가 특정 공연, 축제 데이터를 북마크에 저장하거나 삭제할 수 있는 API입니다.\n" +
-                          " 동일한 요청을 반복하면 이미 북마크된 상태일 경우 삭제, 그렇지 않을 경우 생성됩니다.",
+            description = """
+                          사용자가 특정 공연, 축제 데이터를 북마크에 저장하거나 삭제할 수 있는 API입니다.\n
+                          동일한 요청을 반복하면 이미 북마크된 상태일 경우 삭제, 그렇지 않을 경우 생성됩니다.
+                          """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -84,8 +86,10 @@ public class BookmarkController {
 
     @Operation(
             summary = "북마크 조회",
-            description = " 현재 그룹 사용자가 찜한 북마크 데이터를 조회하는 API입니다.\n" +
-                          " 반환 데이터는 사용자가 저장한 공연, 축제, 음식점 정보의 세부 데이터와 타입 형태(예: festival, performance)로 구성됩니다.",
+            description = """
+                          현재 그룹 사용자가 찜한 북마크 데이터를 조회하는 API입니다.\n
+                          반환 데이터는 사용자가 저장한 공연, 축제, 음식점 정보의 세부 데이터와 타입 형태(예: festival, performance)로 구성됩니다.
+                          """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",

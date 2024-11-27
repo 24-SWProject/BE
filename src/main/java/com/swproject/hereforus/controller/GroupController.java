@@ -32,7 +32,10 @@ public class GroupController {
     /* 그룹 코드 조회 */
     @Operation(
             summary = "그룹 코드 조회",
-            description = "그룹 생성 시 발급된 고유 그룹 코드 8글자를 조회합니다. 이 코드는 다른 사용자를 그룹에 초대하거나 초대를 받을 때 사용됩니다.",
+            description = """
+            그룹 생성 시 발급된 고유 그룹 코드 8글자를 조회합니다.\n
+            이 코드는 다른 사용자를 그룹에 초대하거나 초대를 받을 때 사용됩니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -70,7 +73,7 @@ public class GroupController {
     @Operation(
             summary = "그룹 프로필 조회",
             description = """
-            현재 그룹의 프로필 정보를 확인합니다. 그룹 닉네임, 기념일, 대표 이미지와 같은 세부 정보를 포함합니다.
+            현재 그룹의 프로필 정보를 확인합니다. 그룹 닉네임, 기념일, 대표 이미지와 같은 세부 정보를 포함합니다.\n
             프로필 이미지는 데이터베이스에 Blob 형태로 저장되며, 클라이언트에 반환될 때는 Base64 인코딩된 문자열로 반환됩니다.
             """,
             responses = {
@@ -111,7 +114,10 @@ public class GroupController {
     /* 그룹 프로필 수정 */
     @Operation(
             summary = "그룹 프로필 수정",
-            description = "그룹 초대자가 그룹 닉네임, 기념일, 대표 이미지를 수정할 수 있습니다. 선택적으로 원하는 항목만 변경할 수 있습니다.",
+            description = """
+                    그룹 초대자가 그룹 닉네임, 기념일, 대표 이미지를 수정할 수 있습니다.\n
+                    선택적으로 원하는 항목만 변경할 수 있습니다.
+                    """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -147,7 +153,10 @@ public class GroupController {
     /* 그룹 참여 */
     @Operation(
             summary = "그룹 참여",
-            description = "다른 사용자로부터 제공받은 그룹 코드를 사용하여 그룹에 참여합니다. 그룹의 최대 구성원은 2명입니다.",
+            description = """
+                          다른 사용자로부터 제공받은 그룹 코드를 사용하여 그룹에 참여합니다.\n
+                          그룹의 최대 구성원은 2명입니다.
+                          """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "그룹 참여를 위한 코드 요청 바디",
                     content = @Content(
@@ -200,7 +209,10 @@ public class GroupController {
     /* 기념일 조회 */
     @Operation(
             summary = "기념일 조회",
-            description = "현재 디데이와 함께 100일 단위 및 주년 단위의 주요 기념일 정보를 제공합니다. 반환된 데이터는 기념일 날짜와 해당 날짜까지 남은 일수를 포함합니다.",
+            description = """
+            현재 디데이와 함께 100일 단위 및 주년 단위의 주요 기념일 정보를 제공합니다.\n
+            반환된 데이터는 기념일 날짜와 해당 날짜까지 남은 일수를 포함합니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",

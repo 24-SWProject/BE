@@ -34,7 +34,7 @@ public class EventController {
     @Operation(
             summary = "축제 조회",
             description = """
-            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.
+            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 축제 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.\n
             축제 정보는 서울문화포털에서 제공되며, 축제의 제목, 장소, 시작일, 종료일 등의 정보를 포함합니다.
             """,
             responses = {
@@ -97,7 +97,7 @@ public class EventController {
     @Operation(
             summary = "공연 조회",
             description = """
-            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.
+            사용자가 요청한 날짜로부터 서울특별시에서 진행 중인 공연 정보와 함께 북마크 여부, 타입 형태(예: festival, performance)를 조회합니다.\n
             축제 정보는 공연예술통합전산망에서 제공되며, 공연의 제목, 장소, 시작일, 종료일, 포스터 정보 등을 포함합니다.
             """,
             responses = {
@@ -160,7 +160,10 @@ public class EventController {
 
     @Operation(
             summary = "특정 이벤트 조회",
-            description = "사용자가 요청한 ID에 해당하는 이벤트 정보를 반환합니다. 타입(type)에 따라 '축제(festival)', '공연(performance)' 중 하나를 조회할 수 있습니다."
+            description = """
+                    사용자가 요청한 ID에 해당하는 이벤트 정보를 반환합니다.\n
+                    타입(type)에 따라 '축제(festival)', '공연(performance)' 중 하나를 조회할 수 있습니다.
+                    """
             ,
             responses = {
                     @ApiResponse(

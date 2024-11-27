@@ -98,7 +98,10 @@ public class UserController {
 
     @Operation(
             summary = "로그아웃",
-            description = "JWT 방식으로 인증된 사용자의 로그아웃을 처리합니다. 클라이언트가 보유한 액세스 및 리프레시 토큰을 삭제하여 로그아웃을 완료합니다.",
+            description = """
+            JWT 방식으로 인증된 사용자의 로그아웃을 처리합니다.\n
+            클라이언트가 보유한 액세스 및 리프레시 토큰을 삭제하여 로그아웃을 완료합니다.
+            """,
             responses = {
                     @ApiResponse(
                             responseCode = "200",

@@ -12,8 +12,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+import java.util.spi.LocaleServiceProvider;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -60,14 +63,25 @@ public class ScheduleService {
         return "일정이 삭제되었습니다.";
     }
 
-    public List<ScheduleDto> selectSchedule() {
+    public List<ScheduleDto> selectSchedule(String date) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
 
-        List<Schedule> existingSchedules = scheduleRepository.findAllByGroup(group.get());
+        List<Schedule> schedules;
+
+        if (date != null && !date.isEmpty()) {
+            // 월의 첫날과 마지막 날 계산
+            LocalDate startDate = LocalDate.parse(date + "-01");
+            LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+
+            // Repository 호출
+            schedules = scheduleRepository.findAllByGroupAndDateRange(group.get(), startDate, endDate);
+        } else {
+            schedules = scheduleRepository.findAllByGroup(group.get());
+        }
 
         // 리스트 변환
-        return existingSchedules.stream()
+        return schedules.stream()
                 .map(schedule -> modelMapper.map(schedule, ScheduleDto.class))
                 .collect(Collectors.toList());
     }
