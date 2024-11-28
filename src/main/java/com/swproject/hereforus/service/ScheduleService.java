@@ -46,6 +46,7 @@ public class ScheduleService {
     public ScheduleDto updateSchedule(ScheduleDto scheduleDto, Long id) {
         Optional<Schedule> existingSchedule = scheduleRepository.findById(id);
         existingSchedule.get().setContent(scheduleDto.getContent());
+        existingSchedule.get().setScheduleDate(scheduleDto.getScheduleDate());
 
         Schedule updatedSchedule = scheduleRepository.save(existingSchedule.get());
         return modelMapper.map(updatedSchedule, ScheduleDto.class);

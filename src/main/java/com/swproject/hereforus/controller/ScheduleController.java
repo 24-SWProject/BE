@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,13 @@ public class ScheduleController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "일정 생성 성공",
-                            content = @Content(schema = @Schema(implementation = ScheduleDto.class))),
+                            content = @Content(schema = @Schema(example = """
+                                    {
+                                        "id": 2,
+                                        "content": "테스트",
+                                        "scheduleDate": "2024-11-26"
+                                    }
+                                    """))),
                     @ApiResponse(
                             responseCode = "403",
                             description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
@@ -48,7 +55,7 @@ public class ScheduleController {
     )
     @PostMapping
     public ResponseEntity<?> createSchedule(
-            @RequestBody ScheduleDto scheduleDto
+            @Valid @RequestBody ScheduleDto scheduleDto
     ) {
         try {
             Object result = scheduleService.saveSchedule(scheduleDto);
@@ -73,7 +80,13 @@ public class ScheduleController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "일정 수정 성공",
-                            content = @Content(schema = @Schema(implementation = Page.class))),
+                            content = @Content(schema = @Schema(example = """
+                                    {
+                                        "id": 2,
+                                        "content": "테스트",
+                                        "scheduleDate": "2024-11-26"
+                                    }
+                                    """))),
                     @ApiResponse(
                             responseCode = "403",
                             description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
@@ -88,7 +101,7 @@ public class ScheduleController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSchedule(
             @PathVariable("id") Long id,
-            @RequestBody ScheduleDto scheduleDto
+            @Valid @RequestBody ScheduleDto scheduleDto
     ) {
         try {
             Object result = scheduleService.updateSchedule(scheduleDto, id);

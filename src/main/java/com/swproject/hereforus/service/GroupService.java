@@ -59,12 +59,18 @@ public class GroupService {
     // inviter 찾아서 그 group에 저장
     public GroupOutputDto saveGroupProfile(GroupDto groupDto) throws IOException {
         User user = userDetailService.getAuthenticatedUserId();
-        Optional<Group> group = groupRepository.findByInviter(user.getId());
+        Optional<Group> group = findGroupForUser(user.getId());
         Group existingGroup = group.get();
 
-        existingGroup.setNickName(groupDto.getNickName());
-        existingGroup.setAnniversary(groupDto.getAnniversary());
-        existingGroup.setProfileImg(groupDto.getProfileImg() != null ? groupDto.getProfileImg().getBytes() : null);
+        if (groupDto.getNickName() != null) {
+            existingGroup.setNickName(groupDto.getNickName());
+        }
+        if (groupDto.getAnniversary() != null) {
+            existingGroup.setAnniversary(groupDto.getAnniversary());
+        }
+        if (groupDto.getProfileImg() != null) {
+            existingGroup.setProfileImg(groupDto.getProfileImg().getBytes());
+        }
 
         Group updatedProfile = groupRepository.save(existingGroup);
         GroupOutputDto dto = modelMapper.map(updatedProfile, GroupOutputDto.class);
@@ -100,6 +106,18 @@ public class GroupService {
         }
         return null;
     }
+
+    // 그룹 참여 여부 반환
+    public boolean isUserInGroup() {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = findGroupForUser(user.getId());
+        // 초대자가 있는 경우
+        if (group.get().getInvitee() != null) {
+            return true;
+        }
+        return false;
+    }
+
 
 
     /** 초대받은 그룹 ID 조회 */
