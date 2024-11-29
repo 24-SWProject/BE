@@ -217,17 +217,4 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-
-    @Hidden
-    @GetMapping("/food")
-    public ResponseEntity<?> getFood(Pageable pageable) {
-        try {
-            Page<Food> foods = eventService.getPagedFoodData(pageable);
-            return ResponseEntity.ok(foods);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
 }

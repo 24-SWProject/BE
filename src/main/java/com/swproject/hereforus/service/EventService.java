@@ -193,10 +193,6 @@ public class EventService {
         }
     }
 
-    public Page<Food> getPagedFoodData(Pageable pageable) {
-        return foodRepository.findAll(pageable);
-    }
-
     // 북마크 여부 판단
     private boolean isBookmarked(String type, Long referenceId) {
         User user = userDetailService.getAuthenticatedUserId();
