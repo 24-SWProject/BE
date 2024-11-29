@@ -16,7 +16,6 @@ public class ScheduleDto {
     @Schema(hidden = true)
     private Long id;
 
-    @NotBlank(message = "내용을 입력해주세요.")
     private String content;
 
     private LocalDate scheduleDate;

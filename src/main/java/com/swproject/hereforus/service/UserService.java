@@ -7,7 +7,6 @@ import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -15,11 +14,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 
 @Configuration
 @PropertySource("classpath:env.properties")
@@ -49,8 +49,67 @@ public class UserService {
         return url;
     }
 
+    public String fetchKakaoUrl() {
+        String baseUrl = "https://kauth.kakao.com/oauth/authorize";
 
-    public String CodeToToken(String code, String state) throws IOException {
+        String url = UriComponentsBuilder
+                .fromUriString(baseUrl)
+                .queryParam("client_id", envConfig.getKakaoClientId())
+                .queryParam("redirect_uri", envConfig.getKakaoCallbackUrl())
+                .queryParam("response_type", "code")
+                .toUriString();
+
+        return url;
+    }
+
+    public String CodeToTokenByKakao(String code) throws IOException {
+        String baseUrl = "https://kauth.kakao.com/oauth/token";
+
+        // Headers 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        // Body 설정
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", envConfig.getKakaoClientId());
+        body.add("redirect_uri", envConfig.getKakaoCallbackUrl());
+        body.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class);
+
+        // token 추출
+        JsonNode rootNode = objectMapper.readTree(response.getBody());
+        String token = rootNode.path("access_token").asText();
+
+        return token;
+    }
+
+    public UserDto fetchKakaoProfile(String token) throws IOException {
+        String apiUrl = "https://kapi.kakao.com/v2/user/me";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.set("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+        String responseBody = response.getBody();
+
+        JsonNode rootNode = objectMapper.readTree(responseBody);
+        JsonNode kakaoAccount = rootNode.path("kakao_account");
+
+        return UserDto.builder()
+                .email(kakaoAccount.path("email").asText())
+                .nickname(kakaoAccount.path("nickname").asText(null))
+                .build();
+    }
+
+
+    public String CodeToTokenByNaver(String code, String state) throws IOException {
         String baseUrl = "https://nid.naver.com/oauth2.0/token";
 
         String url = UriComponentsBuilder

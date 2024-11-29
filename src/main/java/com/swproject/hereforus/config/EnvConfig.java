@@ -49,4 +49,10 @@ public class EnvConfig {
 
     @Value("${AI_URL}")
     private String AIUrl;
+
+    @Value("${KAKAO_CLIENT_ID}")
+    private String KakaoClientId;
+
+    @Value("${KAKAO_CALLBACK_URL}")
+    private String KakaoCallbackUrl;
 }

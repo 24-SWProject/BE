@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -55,7 +54,7 @@ public class ScheduleController {
     )
     @PostMapping
     public ResponseEntity<?> createSchedule(
-            @Valid @RequestBody ScheduleDto scheduleDto
+            @RequestBody ScheduleDto scheduleDto
     ) {
         try {
             Object result = scheduleService.saveSchedule(scheduleDto);
@@ -101,7 +100,7 @@ public class ScheduleController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSchedule(
             @PathVariable("id") Long id,
-            @Valid @RequestBody ScheduleDto scheduleDto
+            @RequestBody ScheduleDto scheduleDto
     ) {
         try {
             Object result = scheduleService.updateSchedule(scheduleDto, id);

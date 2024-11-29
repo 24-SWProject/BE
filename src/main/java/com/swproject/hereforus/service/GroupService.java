@@ -118,8 +118,6 @@ public class GroupService {
         return false;
     }
 
-
-
     /** 초대받은 그룹 ID 조회 */
     public Optional<Group> findGroupForUser(Long userId) {
         // invitee로 그룹 우선 조회
@@ -201,6 +199,29 @@ public class GroupService {
             code.append(characters.charAt(random.nextInt(characters.length())));
         }
         return code.toString();
+    }
+
+
+    // 그룹 정보 초기화
+    public String resetGroupInfo() {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> groupOptional = findGroupForUser(user.getId());
+
+        Group group = groupOptional.get();
+
+        if (user.getId().equals(group.getInviter().getId())) {
+            // 그룹의 정보 모두 지우기 (code, inviter 빼고)
+            group.setNickName(null);
+            group.setProfileImg(null);
+            group.setAnniversary(null);
+
+            groupRepository.save(group);
+        } else if (user.getId().equals(group.getInvitee().getId())) {
+            // 그룹의 invitee 지우기
+            group.setInvitee(null);
+            groupRepository.save(group);
+        }
+        return "그룹 탈퇴가 완료되었습니다.";
     }
 }
 

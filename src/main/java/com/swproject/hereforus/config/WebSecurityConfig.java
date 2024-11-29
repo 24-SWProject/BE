@@ -41,6 +41,9 @@ public class WebSecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/api/user/login",
             "/api/user/naver",
+            "/api/user/login/**",
+            "/api/user/kakao",
+            "/api/auth/event/food",
             "/api/event/**",
             "/swagger-ui.html",
             "/swagger-ui/**",

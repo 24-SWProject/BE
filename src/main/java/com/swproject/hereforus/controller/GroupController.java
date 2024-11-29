@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -136,7 +135,7 @@ public class GroupController {
             }
     )
     @PutMapping
-    public ResponseEntity<?> updateGroupProfile(@Valid @ModelAttribute GroupDto groupDto) {
+    public ResponseEntity<?> updateGroupProfile(@ModelAttribute GroupDto groupDto) {
         try {
             GroupOutputDto updatedProfile = groupService.saveGroupProfile(groupDto);
             return ResponseEntity.ok(updatedProfile);
@@ -171,7 +170,7 @@ public class GroupController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "그룹 참여 성공",
-                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 200, \"message\": \"그룹 참여에 성공하였습니다.\" }"))
+                            content = @Content(schema = @Schema(example = "그룹 참여에 성공하였습니다."))
                     ),
                     @ApiResponse(
                             responseCode = "403",
@@ -345,6 +344,45 @@ public class GroupController {
     public ResponseEntity<?> getGroupAnnivarsary() {
         try {
             Map<?, ?> result = groupService.selectGroupAnniversary();
+            return ResponseEntity.ok(result);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Operation(
+            summary = "그룹 탈퇴",
+            description = """
+            그룹에서 탈퇴할 수 있는 기능입니다. 
+            사용자가 그룹의 초대자(inviter)인 경우, 모든 정보를 초기화하고 초대자를 유지합니다. 
+            사용자가 그룹의 참여자(invitee)인 경우, 참여자 정보를 제거하여 그룹에서 탈퇴 처리됩니다.
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "그룹 탈퇴",
+                            content = @Content(schema = @Schema(example = "그룹 탈퇴가 완료되었습니다."))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
+                    )
+            }
+    )
+    @DeleteMapping
+    public ResponseEntity<?> deleteGroup() {
+        try {
+            String result = groupService.resetGroupInfo();
             return ResponseEntity.ok(result);
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());

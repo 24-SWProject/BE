@@ -54,16 +54,16 @@ public class UserController {
             }
     )
     @GetMapping("/user/login")
-    public void getCodeStatus(HttpServletResponse response) throws IOException {
+    public void getCodeByNaver(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchNaverUrl();
         response.sendRedirect(loginUrl);
     }
 
     @Hidden
-    @GetMapping(value = "/user/naver", produces = "application/json")
-    public void getToken(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
+    @GetMapping(value = "/user/naver")
+    public void getTokenByNave(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
             // Code를 사용해 토큰을 요청
-            String token = userService.CodeToToken(code, state);
+            String token = userService.CodeToTokenByNaver(code, state);
             // 토큰으로 네이버에서 사용자 프로필 조회
             UserDto profile = userService.fetchNaverProfile(token);
 
@@ -84,16 +84,54 @@ public class UserController {
             Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
             httpServletResponse.addCookie(refreshCookie);
 
-//            return ResponseEntity.status(HttpStatus.OK).body(accessToken);
-//            httpServletResponse.sendRedirect(envConfig.getClientUrl());
-
+            // 프론트엔드로 보낼 Redirect Url 생성
             String redirectUrl = UriComponentsBuilder
-                    .fromUriString(envConfig.getClientUrl()) // 프론트엔드 URL
-                    .queryParam("accessToken", accessToken)  // 쿼리 파라미터 추가
+                    .fromUriString(envConfig.getClientUrl())
+                    .queryParam("accessToken", accessToken)
                     .build()
                     .toUriString();
 
             httpServletResponse.sendRedirect(redirectUrl);
+    }
+
+    @Hidden
+    @GetMapping("/user/login/kakao")
+    public void getCodeByKakao(HttpServletResponse response) throws IOException {
+        String loginUrl = userService.fetchKakaoUrl();
+        response.sendRedirect(loginUrl);
+    }
+
+    @Hidden
+    @GetMapping("/user/kakao")
+    public void getTokenByKakao(@RequestParam(value="code") String code, HttpServletResponse response) throws IOException {
+        String token = userService.CodeToTokenByKakao(code);
+        UserDto profile = userService.fetchKakaoProfile(token);
+
+        // 유저 중복 확인
+        Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
+        if (!existingUser.isPresent()) {
+            userService.createUser(profile);
+        }
+
+        // 액세스 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
+        response.setHeader("Authorization", "Bearer " + accessToken);
+
+        response.setHeader("Access-Control-Allow-Headers", "Authorization");
+
+        // 리프레시 토큰 생성
+        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
+        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
+        response.addCookie(refreshCookie);
+
+        // 프론트엔드로 보낼 Redirect Url 생성
+        String redirectUrl = UriComponentsBuilder
+                .fromUriString(envConfig.getClientUrl())
+                .queryParam("accessToken", accessToken)
+                .build()
+                .toUriString();
+
+        response.sendRedirect(redirectUrl);
     }
 
     @Operation(
