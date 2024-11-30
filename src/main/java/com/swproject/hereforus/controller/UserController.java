@@ -94,7 +94,22 @@ public class UserController {
             httpServletResponse.sendRedirect(redirectUrl);
     }
 
-    @Hidden
+    @Operation(
+            summary = "카카오 로그인 및 회원가입",
+            description = "카카오 소셜 로그인 기능을 사용해 간편하게 로그인하거나 새로운 계정을 생성할 수 있습니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "로그인 성공",
+                            content = @Content(schema = @Schema(example = "{\"message\":\"네이버 로그인이 완료되었습니다.\"}"))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
+                    )
+            }
+    )
     @GetMapping("/user/login/kakao")
     public void getCodeByKakao(HttpServletResponse response) throws IOException {
         String loginUrl = userService.fetchKakaoUrl();
@@ -104,6 +119,46 @@ public class UserController {
     @Hidden
     @GetMapping("/user/kakao")
     public void getTokenByKakao(@RequestParam(value="code") String code, HttpServletResponse response) throws IOException {
+        String token = userService.CodeToTokenByKakao(code);
+        UserDto profile = userService.fetchKakaoProfile(token);
+
+        // 유저 중복 확인
+        Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
+        if (!existingUser.isPresent()) {
+            userService.createUser(profile);
+        }
+
+        // 액세스 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
+        response.setHeader("Authorization", "Bearer " + accessToken);
+
+        response.setHeader("Access-Control-Allow-Headers", "Authorization");
+
+        // 리프레시 토큰 생성
+        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
+        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
+        response.addCookie(refreshCookie);
+
+        // 프론트엔드로 보낼 Redirect Url 생성
+        String redirectUrl = UriComponentsBuilder
+                .fromUriString(envConfig.getClientUrl())
+                .queryParam("accessToken", accessToken)
+                .build()
+                .toUriString();
+
+        response.sendRedirect(redirectUrl);
+    }
+
+    @Hidden
+    @GetMapping("/user/login/google")
+    public void getCodeByGoogle(HttpServletResponse response) throws IOException {
+        String loginUrl = userService.fetchGoogleUrl();
+        response.sendRedirect(loginUrl);
+    }
+
+    @Hidden
+    @GetMapping("/user/google")
+    public void getTokenByGoogle(@RequestParam(value="code") String code, HttpServletResponse response) throws IOException {
         String token = userService.CodeToTokenByKakao(code);
         UserDto profile = userService.fetchKakaoProfile(token);
 

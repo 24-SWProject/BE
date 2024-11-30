@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -19,7 +20,7 @@ public class RecommendService {
     private final EnvConfig envConfig;
     private final RestTemplate restTemplate;
 
-    public String fetchRecommendByAI(String requestBody) {
+    public String fetchRecommendByAI(Map<String, List<String>> requestBody) {
         String url = UriComponentsBuilder
                 .fromUriString(envConfig.getAIUrl())
                 .toUriString();
@@ -29,7 +30,7 @@ public class RecommendService {
         headers.setContentType(MediaType.APPLICATION_JSON); // Content-Type: application/json 설정
 
         // 요청 본문과 헤더를 함께 설정
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<Map<String, List<String>>> entity = new HttpEntity<>(requestBody, headers);
 
         // POST 요청 전송
         String response = restTemplate.postForObject(url, entity, String.class);

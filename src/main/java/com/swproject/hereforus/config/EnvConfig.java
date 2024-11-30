@@ -55,4 +55,16 @@ public class EnvConfig {
 
     @Value("${KAKAO_CALLBACK_URL}")
     private String KakaoCallbackUrl;
+
+    @Value("${GOOGLE_API_KEY}")
+    private String GoogleApiKey;
+
+    @Value("${GOOGLE_CLIENT_ID}")
+    private String GoogleClientId;
+
+    @Value("${GOOGLE_CLIENT_SECRET}")
+    private String GoogleClientSecret;
+
+    @Value("${GOOGLE_CALLBACK_URL}")
+    private String GoogleCallbackUrl;
 }

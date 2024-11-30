@@ -35,6 +35,7 @@ public class UserService {
     private final UserDetailService userDetailService;
     private final GroupService groupService;
 
+    /** 네이버 로그인 */
     public String fetchNaverUrl() {
         String baseUrl = "https://nid.naver.com/oauth2.0/authorize";
 
@@ -49,6 +50,45 @@ public class UserService {
         return url;
     }
 
+    public String CodeToTokenByNaver(String code, String state) throws IOException {
+        String baseUrl = "https://nid.naver.com/oauth2.0/token";
+
+        String url = UriComponentsBuilder
+                .fromUriString(baseUrl)
+                .queryParam("grant_type", "authorization_code")
+                .queryParam("client_id", envConfig.getNaverClientId())
+                .queryParam("client_secret", envConfig.getNaverClientSecret())
+                .queryParam("code", code)
+                .queryParam("state", state)
+                .toUriString();
+
+        String response = restTemplate.getForObject(url, String.class);
+        JsonNode rootNode = objectMapper.readTree(response);
+        JsonNode accessToken = rootNode.path("access_token");
+
+        return objectMapper.writeValueAsString(accessToken);
+    }
+
+    public UserDto fetchNaverProfile(String token) throws IOException {
+        String apiUrl = "https://openapi.naver.com/v1/nid/me";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
+        String responseBody = response.getBody();
+        JsonNode rootNode = objectMapper.readTree(responseBody);
+        JsonNode responseNode = rootNode.path("response");
+
+        return UserDto.builder()
+                .email(responseNode.path("email").asText())
+                .nickname(responseNode.path("nickname").asText())
+                .birthDate(responseNode.path("birthday").asText())
+                .build();
+    }
+
+    /** 카카오 로그인 */
     public String fetchKakaoUrl() {
         String baseUrl = "https://kauth.kakao.com/oauth/authorize";
 
@@ -108,43 +148,31 @@ public class UserService {
                 .build();
     }
 
+    /** 구글 로그인 */
+    public String fetchGoogleUrl() {
+        String baseUrl = String.format("https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=%s", envConfig.getGoogleApiKey());
 
-    public String CodeToTokenByNaver(String code, String state) throws IOException {
-        String baseUrl = "https://nid.naver.com/oauth2.0/token";
+        // Body 설정
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+        body.add("requestUri",envConfig.getGoogleCallbackUrl());
+        body.add("postBody", String.format("id_token=%s&providerId=google.com", envConfig.getGoogleClientId()));
+        body.add("returnSecureToken", "true");
+        body.add("returnIdpCredential", "true");
 
-        String url = UriComponentsBuilder
-                .fromUriString(baseUrl)
-                .queryParam("grant_type", "authorization_code")
-                .queryParam("client_id", envConfig.getNaverClientId())
-                .queryParam("client_secret", envConfig.getNaverClientSecret())
-                .queryParam("code", code)
-                .queryParam("state", state)
-                .toUriString();
 
-        String response = restTemplate.getForObject(url, String.class);
-        JsonNode rootNode = objectMapper.readTree(response);
-        JsonNode accessToken = rootNode.path("access_token");
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body);
 
-        return objectMapper.writeValueAsString(accessToken);
+        ResponseEntity<String> response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class);
+
+        return response.getBody();
     }
 
-    public UserDto fetchNaverProfile(String token) throws IOException {
-        String apiUrl = "https://openapi.naver.com/v1/nid/me";
+    public String CodeToTokenByGoogle(String code) throws IOException {
+        return code;
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class);
-        String responseBody = response.getBody();
-        JsonNode rootNode = objectMapper.readTree(responseBody);
-        JsonNode responseNode = rootNode.path("response");
-
-        return UserDto.builder()
-                .email(responseNode.path("email").asText())
-                .nickname(responseNode.path("nickname").asText())
-                .birthDate(responseNode.path("birthday").asText())
-                .build();
+    public String fetchGoogleProfile(String code) throws IOException {
+        return code;
     }
 
     // User 생성
