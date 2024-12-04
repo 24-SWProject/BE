@@ -1,9 +1,12 @@
 package com.swproject.hereforus.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.event.FestivalDto;
+import com.swproject.hereforus.dto.event.MovieDto;
 import com.swproject.hereforus.dto.event.PerformanceDto;
+import com.swproject.hereforus.entity.Movie;
 import com.swproject.hereforus.entity.event.Festival;
 import com.swproject.hereforus.entity.event.Food;
 import com.swproject.hereforus.entity.event.Performance;
@@ -24,12 +27,52 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "Event", description = "서울특별시의 행사 관련 REST API에 대한 명세를 제공합니다. 사용자가 요청한 날짜를 기준으로 진행 중인 행사를 조회합니다.")
 @RestController
 @RequestMapping("/api/auth/event")
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
+
+    @Operation(
+            summary = "영화 조회",
+            description = """
+            오늘 날짜 기준으로 박스오피스 순위 10위까지의 영화를 조회할 수 있습니다.\n
+            영화 정보는 KOBIS 영화진흥위원회와 KMDb에서 제공되며, 영화의 제목, 개봉일, 포스터, 러닝타임, 배우 등의 정보를 포함합니다.
+            """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "영화 데이터 조회 성공.",
+                            content = @Content(schema = @Schema(implementation = MovieDto.class))),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "리소스에 접근할 권한이 없거나 인증 정보가 유효하지 않음",
+                            content = @Content(schema = @Schema(example = "{\"error\":\"사용자 인증에 실패하였습니다.\"}"))),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "서버 에러 발생",
+                            content = @Content(schema = @Schema(example = "{ \"statusCode\": 500, \"message\": \"서버에 문제가 발생했습니다.\" }"))
+                    )
+            }
+    )
+    @GetMapping("/movie")
+    public Object getMovies() {
+        try {
+            List<Movie> movies = eventService.getMovieByDate();
+            return ResponseEntity.ok(movies);
+        } catch (CustomException e) {
+            ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(errorResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 
     @Operation(
             summary = "축제 조회",

@@ -17,6 +17,18 @@ public class EnvConfig {
     @Value("${PERFORMANCE_BASEURL}")
     private String PerformanceBaseUrl;
 
+    @Value("${KMDB_BASEURL}")
+    private String KMDBBaseUrl;
+
+    @Value("${KMDB_SERVICE_KEY}")
+    private String KMDBServiceKey;
+
+    @Value("${KOBIS_BASEURL}")
+    private String KobisBaseUrl;
+
+    @Value("${KOBIS_SERVICE_KEY}")
+    private String KobisServiceKey;
+
     @Value("${NAVER_CLIENT_ID}")
     private String NaverClientId;
 
@@ -55,16 +67,4 @@ public class EnvConfig {
 
     @Value("${KAKAO_CALLBACK_URL}")
     private String KakaoCallbackUrl;
-
-    @Value("${GOOGLE_API_KEY}")
-    private String GoogleApiKey;
-
-    @Value("${GOOGLE_CLIENT_ID}")
-    private String GoogleClientId;
-
-    @Value("${GOOGLE_CLIENT_SECRET}")
-    private String GoogleClientSecret;
-
-    @Value("${GOOGLE_CALLBACK_URL}")
-    private String GoogleCallbackUrl;
 }
