@@ -5,8 +5,11 @@ import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.config.jwt.JwtTokenProvider;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.dto.UserDto;
+import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.repository.GroupRepository;
 import com.swproject.hereforus.repository.UserRepository;
+import com.swproject.hereforus.service.GroupService;
 import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Tag(name = "User", description = "회원 관련 REST API에 대한 명세를 제공합니다. ")
@@ -36,6 +41,8 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final EnvConfig envConfig;
+    private final GroupRepository groupRepository;
+    private final GroupService groupService;
 
     @Operation(
             summary = "네이버 로그인 및 회원가입",
@@ -67,13 +74,32 @@ public class UserController {
             // 토큰으로 네이버에서 사용자 프로필 조회
             UserDto profile = userService.fetchNaverProfile(token);
 
-            // 유저 중복 확인
-            Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
-            if (!existingUser.isPresent()) {
-                userService.createUser(profile);
-            }
+        // 유저 중복 확인
+        Optional<User> allUser = userRepository.findByEmail(profile.getEmail());
 
-            // 액세스 토큰 생성
+        if (allUser.isPresent() && allUser.get().getDeletedAt() != null) {
+            User user = allUser.get();
+            groupRepository.deleteByInviter(user.getId());
+            user.setDeletedAt(null);  // 삭제된 사용자의 복원
+            user.setNickname(null);
+            user.setBirthDate(null);
+            user.setUpdatedAt(LocalDate.now());  // 업데이트 일자 변경
+            User newUser = userRepository.save(user);  // 복원된 사용자 정보 저장
+
+            // Group 생성
+            Group group = Group.builder()
+                    .id(groupService.generateCode())
+                    .inviter(newUser)
+                    .build();
+
+            groupRepository.save(group);
+
+        } else if (!allUser.isPresent()) {
+            userService.createUser(profile);
+        }
+
+
+        // 액세스 토큰 생성
             String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
             httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
 
@@ -118,53 +144,31 @@ public class UserController {
 
     @Hidden
     @GetMapping("/user/kakao")
-    public void getTokenByKakao(@RequestParam(value="code") String code, HttpServletResponse response) throws IOException {
-        String token = userService.CodeToTokenByKakao(code);
+    public void getTokenByKakao(@RequestParam(value="code") String code, HttpServletResponse response, HttpSession session) throws IOException {
+        String token = userService.CodeToTokenByKakao(code, session);
         UserDto profile = userService.fetchKakaoProfile(token);
 
         // 유저 중복 확인
-        Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
-        if (!existingUser.isPresent()) {
-            userService.createUser(profile);
-        }
+        Optional<User> allUser = userRepository.findByEmail(profile.getEmail());
 
-        // 액세스 토큰 생성
-        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
-        response.setHeader("Authorization", "Bearer " + accessToken);
+        if (allUser.isPresent() && allUser.get().getDeletedAt() != null) {
+            User user = allUser.get();
+            groupRepository.deleteByInviter(user.getId());
+            user.setDeletedAt(null);  // 삭제된 사용자의 복원
+            user.setNickname(null);
+            user.setBirthDate(null);
+            user.setUpdatedAt(LocalDate.now());  // 업데이트 일자 변경
+            User newUser = userRepository.save(user);  // 복원된 사용자 정보 저장
 
-        response.setHeader("Access-Control-Allow-Headers", "Authorization");
+            // Group 생성
+            Group group = Group.builder()
+                    .id(groupService.generateCode())
+                    .inviter(newUser)
+                    .build();
 
-        // 리프레시 토큰 생성
-        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
-        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
-        response.addCookie(refreshCookie);
+            groupRepository.save(group);
 
-        // 프론트엔드로 보낼 Redirect Url 생성
-        String redirectUrl = UriComponentsBuilder
-                .fromUriString(envConfig.getClientUrl())
-                .queryParam("accessToken", accessToken)
-                .build()
-                .toUriString();
-
-        response.sendRedirect(redirectUrl);
-    }
-
-    @Hidden
-    @GetMapping("/user/login/google")
-    public void getCodeByGoogle(HttpServletResponse response) throws IOException {
-        String loginUrl = userService.fetchGoogleUrl();
-        response.sendRedirect(loginUrl);
-    }
-
-    @Hidden
-    @GetMapping("/user/google")
-    public void getTokenByGoogle(@RequestParam(value="code") String code, HttpServletResponse response) throws IOException {
-        String token = userService.CodeToTokenByKakao(code);
-        UserDto profile = userService.fetchKakaoProfile(token);
-
-        // 유저 중복 확인
-        Optional<User> existingUser = userRepository.findByEmail(profile.getEmail());
-        if (!existingUser.isPresent()) {
+        } else if (!allUser.isPresent()) {
             userService.createUser(profile);
         }
 
@@ -248,7 +252,7 @@ public class UserController {
             }
     )
     @DeleteMapping("/auth/user")
-    public ResponseEntity<?> deleteUser() {
+    public ResponseEntity<?> deleteUser(HttpSession session) {
         try {
             userService.withdrawUser();
             return ResponseEntity.ok("회원 탈퇴가 성공적으로 처리되었습니다.");

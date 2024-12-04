@@ -14,6 +14,6 @@ import java.util.Optional;
 public interface FestivalRepository extends JpaRepository<Festival, Long> {
     Optional<Festival> findByTitle(String title);
 
-    @Query("SELECT f FROM Festival f WHERE f.openDate <= :date AND f.endDate >= :date")
+    @Query("SELECT f FROM Festival f WHERE f.openDate <= :date AND f.endDate >= :date ORDER BY f.endDate ASC")
     Page<Festival> findFestivalsByDate(@Param("date") String date, Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package com.swproject.hereforus.controller;
 
+import com.swproject.hereforus.config.EnvConfig;
 import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.entity.event.Festival;
@@ -18,10 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/ai")

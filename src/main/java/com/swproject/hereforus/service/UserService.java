@@ -7,6 +7,7 @@ import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.List;
 
 @Configuration
 @PropertySource("classpath:env.properties")
@@ -102,7 +104,7 @@ public class UserService {
         return url;
     }
 
-    public String CodeToTokenByKakao(String code) throws IOException {
+    public String CodeToTokenByKakao(String code, HttpSession session) throws IOException {
         String baseUrl = "https://kauth.kakao.com/oauth/token";
 
         // Headers 설정
@@ -124,6 +126,8 @@ public class UserService {
         JsonNode rootNode = objectMapper.readTree(response.getBody());
         String token = rootNode.path("access_token").asText();
 
+        // 세션에 액세스 토큰 저장
+        session.setAttribute("kakaoAccessToken", token);
         return token;
     }
 
@@ -147,33 +151,29 @@ public class UserService {
                 .nickname(kakaoAccount.path("nickname").asText(null))
                 .build();
     }
+/*
+    public void unlinkKakao(HttpSession session) {
+        // 세션에서 카카오 액세스 토큰 조회
+        String accessToken = (String) session.getAttribute("kakaoAccessToken");
 
-    /** 구글 로그인 */
-    public String fetchGoogleUrl() {
-        String baseUrl = String.format("https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=%s", envConfig.getGoogleApiKey());
+        if (accessToken != null) {
+            String apiUrl = "https://kapi.kakao.com/v1/user/unlink";
 
-        // Body 설정
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
-        body.add("requestUri",envConfig.getGoogleCallbackUrl());
-        body.add("postBody", String.format("id_token=%s&providerId=google.com", envConfig.getGoogleClientId()));
-        body.add("returnSecureToken", "true");
-        body.add("returnIdpCredential", "true");
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + accessToken);
 
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body);
+            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
 
-        ResponseEntity<String> response = restTemplate.exchange(baseUrl, HttpMethod.POST, entity, String.class);
-
-        return response.getBody();
-    }
-
-    public String CodeToTokenByGoogle(String code) throws IOException {
-        return code;
-    }
-
-    public String fetchGoogleProfile(String code) throws IOException {
-        return code;
-    }
+            if (response.getStatusCode() == HttpStatus.OK) {
+                session.removeAttribute("kakaoAccessToken");  // 세션에서 액세스 토큰 제거
+                System.out.println("카카오 계정 연결 해제 성공");
+            } else {
+                System.out.println("카카오 계정 연결 해제 실패");
+            }
+        }
+    }*/
 
     // User 생성
     @Transactional
@@ -191,7 +191,6 @@ public class UserService {
                 .inviter(user)
                 .build();
         user.setGroup(group);
-
 
 
         User savedUser = userRepository.save(user);

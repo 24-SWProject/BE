@@ -101,7 +101,7 @@ public class GroupService {
     public String checkNumberOfGroup(Group group, User user) {
         if (group.getInvitee() != null && group.getInvitee().getId().equals(user.getId())) {
             throw new CustomException(HttpStatus.CONFLICT, "이미 그룹에 참여하였거나, 그룹 인원이 초과되었습니다.");
-        } else if (group.getInviter().getGroup().equals(user.getId())) {
+        } else if (group.getInviter().getId().equals(user.getId())) {
             throw new CustomException(HttpStatus.CONFLICT, "그룹의 초대자는 참여할 수 없습니다.");
         }
         return null;
@@ -209,16 +209,13 @@ public class GroupService {
 
         Group group = groupOptional.get();
 
-        if (user.getId().equals(group.getInviter().getId())) {
-            // 그룹의 정보 모두 지우기 (code, inviter 빼고)
+        if (user.getId().equals(group.getInviter().getId()) || user.getId().equals(group.getInvitee().getId())) {
+            // 그룹의 정보 모두 지우기
             group.setNickName(null);
             group.setProfileImg(null);
             group.setAnniversary(null);
-
-            groupRepository.save(group);
-        } else if (user.getId().equals(group.getInvitee().getId())) {
-            // 그룹의 invitee 지우기
             group.setInvitee(null);
+
             groupRepository.save(group);
         }
         return "그룹 탈퇴가 완료되었습니다.";

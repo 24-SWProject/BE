@@ -14,6 +14,6 @@ import java.util.Optional;
 public interface PerformanceRepository extends JpaRepository<Performance, Long> {
     Optional<Performance> findByTitle(String title);
 
-    @Query("SELECT f FROM Performance f WHERE f.openDate <= :date AND f.endDate >= :date")
+    @Query("SELECT f FROM Performance f WHERE f.openDate <= :date AND f.endDate >= :date ORDER BY f.endDate ASC")
     Page<Performance> findPerformancesByDate(@Param("date") String date, Pageable pageable);
 }

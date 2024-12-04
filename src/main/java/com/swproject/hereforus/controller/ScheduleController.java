@@ -202,6 +202,7 @@ public class ScheduleController {
     public ResponseEntity<?> getSchedule(@RequestParam(name = "date", required = false) String date) {
         try {
             List<ScheduleDto> result = scheduleService.selectSchedule(date);
+            System.out.println(result);
             return ResponseEntity.ok(result);
         } catch (CustomException e) {
             ErrorDto errorResponse = new ErrorDto(e.getStatus().value(), e.getMessage());
