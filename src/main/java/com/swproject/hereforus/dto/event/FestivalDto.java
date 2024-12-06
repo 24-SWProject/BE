@@ -2,6 +2,7 @@ package com.swproject.hereforus.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,41 +10,41 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FestivalDto {
-    private Long id;
+    @JsonProperty("mt20id")
+    private String id;
 
-    @JsonProperty("GUNAME")
-    private String guName;
+    @JsonProperty("genrenm")
+    private String category;
 
-    @JsonProperty("TITLE")
+    @JsonProperty("prfnm")
     private String title;
 
-    @JsonProperty("PLACE")
+    @JsonProperty("fcltynm")
     private String place;
 
-    @JsonProperty("USE_TRGT")
-    private String useTrgt;
-
-    @JsonProperty("USE_FEE")
-    private String useFee;
-
-    @JsonProperty("ORG_LINK")
-    private String registerLink;
-
-    @JsonProperty("MAIN_IMG")
-    private String poster;
-
-    @JsonProperty("RGSTDATE")
-    private String registerDate;
-
-    @JsonProperty("STRTDATE")
+    @JsonProperty("prfpdfrom")
     private String openDate;
 
-    @JsonProperty("END_DATE")
+    @JsonProperty("prfpdto")
     private String endDate;
 
-    @JsonProperty("LOT")
-    private String gpsY;
+    @JsonProperty("poster")
+    private String poster;
 
-    @JsonProperty("LAT")
-    private String gpsX;
+    @JsonProperty("prfstate")
+    private String state;
+
+    private String registerLink;
+
+    private String useFee;
+
+    private String useAge;
+
+    private String useTime;
+
+    @Transient
+    private boolean bookmarked;
+
+    @Transient
+    private String type;
 }

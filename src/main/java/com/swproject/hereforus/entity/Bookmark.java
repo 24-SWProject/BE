@@ -23,10 +23,10 @@ public class Bookmark {
     private String type; // "festival", "performance", "food"
 
     @Column(nullable = false, name = "reference_id")
-    private Long referenceId;
+    private String referenceId;
 
     @Builder
-    public Bookmark(Group group, String type, Long ReferenceId) {
+    public Bookmark(Group group, String type, String ReferenceId) {
         this.group = group;
         this.type = type;
         this.referenceId = ReferenceId;

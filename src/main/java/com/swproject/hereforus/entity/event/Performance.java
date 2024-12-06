@@ -2,6 +2,10 @@ package com.swproject.hereforus.entity.event;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
 
 @Table(name="performance")
 @Getter @Setter
@@ -9,12 +13,17 @@ import lombok.*;
 @Entity
 public class Performance {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
-    private Long id;
+    private String id;
 
     @Column(nullable = false)
     private String title;
+
+    @Column
+    private String category;
+
+    @Column(length = 512)
+    private String place;
 
     @Column(columnDefinition = "DATE")
     private String openDate;
@@ -22,19 +31,35 @@ public class Performance {
     @Column(columnDefinition = "DATE")
     private String endDate;
 
-    private String state;
-
-    @Column(columnDefinition = "TEXT")
-    private String place;
-
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2048)
     private String poster;
 
-    private String category;
+    @Column
+    private String state;
+
+    @Column(length = 2048)
+    private String registerLink;
+
+    @Column(length = 512)
+    private String useFee;
+
+    @Column
+    private String useAge;
+
+    @Column
+    private String useTime;
 
     @Transient
     private boolean bookmarked;
 
     @Transient
     private String type;
+
+    @CreationTimestamp
+    @Column(name= "createdAt", nullable = false, updatable = false)
+    private LocalDate createdAt;
+
+    @UpdateTimestamp
+    @Column(name= "updatedAt", nullable = false)
+    private LocalDate updatedAt;
 }

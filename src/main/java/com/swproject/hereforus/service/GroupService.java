@@ -6,7 +6,10 @@ import com.swproject.hereforus.dto.group.GroupDto;
 import com.swproject.hereforus.dto.group.GroupOutputDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
+import com.swproject.hereforus.repository.BookmarkRepository;
 import com.swproject.hereforus.repository.GroupRepository;
+import com.swproject.hereforus.repository.ScheduleRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +30,8 @@ public class GroupService {
     private final ModelMapper modelMapper;
     private final GroupRepository groupRepository;
     private final UserDetailService userDetailService;
+    private final ScheduleRepository scheduleRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     // 자신의 그룹 코드 조회
     public Optional<GroupCodeDto> fetchGroupCode() {
@@ -203,6 +208,7 @@ public class GroupService {
 
 
     // 그룹 정보 초기화
+    @Transactional
     public String resetGroupInfo() {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> groupOptional = findGroupForUser(user.getId());
@@ -218,6 +224,9 @@ public class GroupService {
 
             groupRepository.save(group);
         }
+
+        scheduleRepository.deleteByGroupId(group.getId());
+        bookmarkRepository.deleteByGroupId(group.getId());
         return "그룹 탈퇴가 완료되었습니다.";
     }
 }

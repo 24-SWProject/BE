@@ -1,7 +1,5 @@
 package com.swproject.hereforus.controller;
 
-import com.swproject.hereforus.config.EnvConfig;
-import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.ErrorDto;
 import com.swproject.hereforus.entity.event.Festival;
 import com.swproject.hereforus.entity.event.Food;
@@ -9,9 +7,8 @@ import com.swproject.hereforus.entity.event.Performance;
 import com.swproject.hereforus.repository.event.FestivalRepository;
 import com.swproject.hereforus.repository.event.FoodRepository;
 import com.swproject.hereforus.repository.event.PerformanceRepository;
-import com.swproject.hereforus.service.EventService;
+import com.swproject.hereforus.service.event.EventService;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -14,8 +14,14 @@ public class EnvConfig {
     @Value("${FESTIVAL_BASEURL}")
     private String FestivalBaseUrl;
 
-    @Value("${PERFORMANCE_BASEURL}")
-    private String PerformanceBaseUrl;
+    @Value("${KOPIS_PERFORMANCE_BASEURL}")
+    private String KopisPerformanceBaseUrl;
+
+    @Value("${KOPIS_FESTIVAL_BASEURL}")
+    private String KopisFestivalBaseUrl;
+
+    @Value("${KOPIS_SERVICE_KEY}")
+    private String KopisServiceKey;
 
     @Value("${KMDB_BASEURL}")
     private String KMDBBaseUrl;

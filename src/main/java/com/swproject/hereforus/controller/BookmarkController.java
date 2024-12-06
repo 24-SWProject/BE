@@ -69,7 +69,7 @@ public class BookmarkController {
     @GetMapping("/{type}/{id}")
     public ResponseEntity<?> createBookmark(
             @PathVariable("type") String type,
-            @PathVariable("id") Long id
+            @PathVariable("id") String id
     ) {
         try {
             Object result = bookmarkService.saveOrDeleteBookmark(type, id);

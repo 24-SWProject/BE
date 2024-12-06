@@ -25,7 +25,7 @@ public class BookmarkService {
     private final UserDetailService userDetailService;
     private final GroupService groupService;
 
-    public Object saveOrDeleteBookmark(String type, Long referenceId) {
+    public Object saveOrDeleteBookmark(String type, String referenceId) {
         User user = userDetailService.getAuthenticatedUserId();
         Optional<Group> group = groupService.findGroupForUser(user.getId());
         Optional<Bookmark> existingBookmark = bookmarkRepository.findByTypeAndReferenceId(type, referenceId);
@@ -53,7 +53,7 @@ public class BookmarkService {
 
         Page<Object> bookmarkDetails = bookmarks.map(bookmark -> {
             String type = bookmark.getType();
-            Long referenceId = bookmark.getReferenceId();
+            String referenceId = bookmark.getReferenceId();
 
             switch (type) {
                 case "festival":
@@ -74,5 +74,18 @@ public class BookmarkService {
         });
 
         return bookmarkDetails;
+    }
+
+    // 북마크 여부 판단
+    public boolean isBookmarked(String type, String referenceId) {
+        User user = userDetailService.getAuthenticatedUserId();
+        Optional<Group> group = groupService.findGroupForUser(user.getId());
+
+        Optional<Bookmark> bookmark = bookmarkRepository.findByTypeAndReferenceIdAndGroupId(type, referenceId, group.get().getId());
+        if (bookmark.isPresent()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

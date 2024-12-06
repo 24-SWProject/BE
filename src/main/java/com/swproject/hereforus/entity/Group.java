@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Table(name="user_group")
@@ -23,6 +24,12 @@ public class Group {
     @JsonIgnore
     @JoinColumn(name = "inviter_id", nullable = false)
     private User inviter;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bookmark> bookmarks;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Schedule> schedules;
 
     @OneToOne
     @JoinColumn(name = "invitee_id")
