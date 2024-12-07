@@ -3,11 +3,11 @@ package com.swproject.hereforus.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swproject.hereforus.config.EnvConfig;
+import com.swproject.hereforus.config.error.CustomException;
 import com.swproject.hereforus.dto.UserDto;
 import com.swproject.hereforus.entity.Group;
 import com.swproject.hereforus.entity.User;
 import com.swproject.hereforus.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,10 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Optional;
 
 @Configuration
 @PropertySource("classpath:env.properties")
@@ -66,9 +67,9 @@ public class UserService {
 
         String response = restTemplate.getForObject(url, String.class);
         JsonNode rootNode = objectMapper.readTree(response);
-        JsonNode accessToken = rootNode.path("access_token");
+        String token = rootNode.path("access_token").asText();
 
-        return objectMapper.writeValueAsString(accessToken);
+        return token;
     }
 
     public UserDto fetchNaverProfile(String token) throws IOException {
@@ -104,7 +105,7 @@ public class UserService {
         return url;
     }
 
-    public String CodeToTokenByKakao(String code, HttpSession session) throws IOException {
+    public String CodeToTokenByKakao(String code) throws IOException {
         String baseUrl = "https://kauth.kakao.com/oauth/token";
 
         // Headers 설정
@@ -126,8 +127,6 @@ public class UserService {
         JsonNode rootNode = objectMapper.readTree(response.getBody());
         String token = rootNode.path("access_token").asText();
 
-        // 세션에 액세스 토큰 저장
-        session.setAttribute("kakaoAccessToken", token);
         return token;
     }
 
@@ -151,29 +150,65 @@ public class UserService {
                 .nickname(kakaoAccount.path("nickname").asText(null))
                 .build();
     }
-/*
-    public void unlinkKakao(HttpSession session) {
-        // 세션에서 카카오 액세스 토큰 조회
-        String accessToken = (String) session.getAttribute("kakaoAccessToken");
 
-        if (accessToken != null) {
-            String apiUrl = "https://kapi.kakao.com/v1/user/unlink";
+    // 카카오 액세스 토큰 저장
+    public void saveKakaoAccessToken(String email, String kakaoAccessToken) {
+        Optional<User> user = userRepository.findByEmail(email);
+        user.get().setAccessToken(kakaoAccessToken);
+        user.get().setSocialType("kakao");
+        userRepository.save(user.get());
+    }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + accessToken);
+    // 카카오 액세스 토큰 조회
+    public String getKakaoAccessToken(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.get().getAccessToken();
+    }
 
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+    // 카카오 연결 끊기
+    public void unlinkKakao(String email) {
+        String accessToken = getNaverAccessToken(email);
 
-            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+        // 카카오 연결 끊기 API 호출
+        String apiUrl = "https://kapi.kakao.com/v1/user/unlink";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                session.removeAttribute("kakaoAccessToken");  // 세션에서 액세스 토큰 제거
-                System.out.println("카카오 계정 연결 해제 성공");
-            } else {
-                System.out.println("카카오 계정 연결 해제 실패");
-            }
-        }
-    }*/
+        restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+    }
+
+    // 네이버 액세스 토큰 저장
+    public void saveNaverAccessToken(String email, String naverAccessToken) {
+        Optional<User> user = userRepository.findByEmail(email);
+        user.get().setAccessToken(naverAccessToken);
+        user.get().setSocialType("naver");
+        userRepository.save(user.get());
+    }
+
+    // 네이버 액세스 토큰 조회
+    public String getNaverAccessToken(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.get().getAccessToken();
+    }
+
+    // 네이버 연결 끊기
+    public void unlinkNaver(String email) {
+        String accessToken = getNaverAccessToken(email);
+
+        // 네이버 연결 끊기 API 호출
+        String apiUrl = "https://nid.naver.com/oauth2.0/token";
+        UriComponents url = UriComponentsBuilder
+                .fromUriString(apiUrl)
+                .queryParam("client_id", envConfig.getNaverClientId())
+                .queryParam("client_secret", envConfig.getNaverClientSecret())
+                .queryParam("access_token", accessToken)
+                .queryParam("grant_type", "delete")
+                .encode()
+                .build();
+
+        restTemplate.getForObject(url.toUri(), String.class);
+    }
 
     // User 생성
     @Transactional

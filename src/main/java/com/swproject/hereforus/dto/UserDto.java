@@ -21,6 +21,8 @@ public class UserDto {
     private String profileImg;
     private String birthYear;
     private String birthDate;
+    private String accessToken;
+    private String socialType;
 }
 
 

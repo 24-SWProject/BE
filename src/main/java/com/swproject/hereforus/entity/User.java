@@ -27,7 +27,7 @@ public class User implements UserDetails {
     @Column(updatable = false)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     private String nickname;
@@ -37,6 +37,9 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "inviter", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Group group;
+
+    private String accessToken;
+    private String socialType;
 
     @CreationTimestamp
     @Column(name= "createdAt", nullable = false, updatable = false)
@@ -95,5 +98,4 @@ public class User implements UserDetails {
     public boolean isEnabled(){
         return true;
     }
-
 }

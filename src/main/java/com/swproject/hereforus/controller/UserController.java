@@ -12,6 +12,7 @@ import com.swproject.hereforus.repository.GroupRepository;
 import com.swproject.hereforus.repository.ScheduleRepository;
 import com.swproject.hereforus.repository.UserRepository;
 import com.swproject.hereforus.service.GroupService;
+import com.swproject.hereforus.service.UserDetailService;
 import com.swproject.hereforus.service.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "User", description = "회원 관련 REST API에 대한 명세를 제공합니다. ")
@@ -45,6 +47,7 @@ public class UserController {
     private final EnvConfig envConfig;
     private final GroupRepository groupRepository;
     private final GroupService groupService;
+    private final UserDetailService userDetailService;
 
     @Operation(
             summary = "네이버 로그인 및 회원가입",
@@ -71,10 +74,10 @@ public class UserController {
     @Hidden
     @GetMapping(value = "/user/naver")
     public void getTokenByNave(@RequestParam(value = "code") String code, @RequestParam(value = "state") String state, HttpServletResponse httpServletResponse) throws IOException {
-            // Code를 사용해 토큰을 요청
-            String token = userService.CodeToTokenByNaver(code, state);
-            // 토큰으로 네이버에서 사용자 프로필 조회
-            UserDto profile = userService.fetchNaverProfile(token);
+        // Code를 사용해 토큰을 요청
+        String token = userService.CodeToTokenByNaver(code, state);
+        // 토큰으로 네이버에서 사용자 프로필 조회
+        UserDto profile = userService.fetchNaverProfile(token);
 
         // 유저 중복 확인
         Optional<User> allUser = userRepository.findByEmail(profile.getEmail());
@@ -100,26 +103,28 @@ public class UserController {
             userService.createUser(profile);
         }
 
+        // 카카오 액세스 토큰 DB에 저장
+        userService.saveNaverAccessToken(profile.getEmail(), token);
 
         // 액세스 토큰 생성
-            String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
-            httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
+        String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
+        httpServletResponse.setHeader("Authorization", "Bearer " + accessToken);
 
-            httpServletResponse.setHeader("Access-Control-Allow-Headers", "Authorization");
+        httpServletResponse.setHeader("Access-Control-Allow-Headers", "Authorization");
 
-            // 리프레시 토큰 생성
-            String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
-            Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
-            httpServletResponse.addCookie(refreshCookie);
+        // 리프레시 토큰 생성
+        String refreshToken = jwtTokenProvider.createRefreshToken(profile.getEmail());
+        Cookie refreshCookie = jwtTokenProvider.createCookie(refreshToken);
+        httpServletResponse.addCookie(refreshCookie);
 
-            // 프론트엔드로 보낼 Redirect Url 생성
-            String redirectUrl = UriComponentsBuilder
-                    .fromUriString(envConfig.getClientUrl())
-                    .queryParam("accessToken", accessToken)
-                    .build()
-                    .toUriString();
+        // 프론트엔드로 보낼 Redirect Url 생성
+        String redirectUrl = UriComponentsBuilder
+                .fromUriString(envConfig.getClientUrl())
+                .queryParam("accessToken", accessToken)
+                .build()
+                .toUriString();
 
-            httpServletResponse.sendRedirect(redirectUrl);
+        httpServletResponse.sendRedirect(redirectUrl);
     }
 
     @Operation(
@@ -147,7 +152,7 @@ public class UserController {
     @Hidden
     @GetMapping("/user/kakao")
     public void getTokenByKakao(@RequestParam(value="code") String code, HttpServletResponse response, HttpSession session) throws IOException {
-        String token = userService.CodeToTokenByKakao(code, session);
+        String token = userService.CodeToTokenByKakao(code);
         UserDto profile = userService.fetchKakaoProfile(token);
 
         // 유저 중복 확인
@@ -173,6 +178,9 @@ public class UserController {
         } else if (!allUser.isPresent()) {
             userService.createUser(profile);
         }
+
+        // 카카오 액세스 토큰 DB에 저장
+        userService.saveKakaoAccessToken(profile.getEmail(), token);
 
         // 액세스 토큰 생성
         String accessToken = jwtTokenProvider.createAccessToken(profile.getEmail());
@@ -254,8 +262,17 @@ public class UserController {
             }
     )
     @DeleteMapping("/auth/user")
-    public ResponseEntity<?> deleteUser(HttpSession session) {
-        try {
+    public ResponseEntity<?> deleteUser() {
+        try{
+            User authenticatedUser = userDetailService.getAuthenticatedUserId();
+            String email = authenticatedUser.getEmail();
+            String type = authenticatedUser.getSocialType();
+
+            if ("kakao".equals(type)) {
+                userService.unlinkKakao(email);
+            } else if ("naver".equals(type)) {
+                userService.unlinkNaver(email);
+            }
             userService.withdrawUser();
             return ResponseEntity.ok("회원 탈퇴가 성공적으로 처리되었습니다.");
         } catch (CustomException e) {
@@ -265,6 +282,28 @@ public class UserController {
             e.printStackTrace();
             ErrorDto errorResponse = new ErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에 문제가 발생했습니다.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Hidden
+    @GetMapping("/kakao/unlink")
+    public ResponseEntity<String> kakaoUnlinkCallback(@RequestParam String id) {
+        try {
+            return ResponseEntity.ok("카카오 회원 탈퇴가 완료되었습니다 :" + id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카카오 회원 탈퇴에 실패하였습니다.");
+        }
+    }
+
+    @Hidden
+    @GetMapping("/naver/unlink")
+    public ResponseEntity<String> naverUnlinkCallback(@RequestParam String id) {
+        try {
+            return ResponseEntity.ok("네이버 회원 탈퇴가 완료되었습니다 :" + id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("네이버 회원 탈퇴에 실패하였습니다.");
         }
     }
 }
